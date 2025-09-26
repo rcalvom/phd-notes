@@ -1,0 +1,10 @@
+services:
+  llvm:
+    build: .
+    image: llvm-sandbox:latest
+    container_name: llvm-sandbox
+    working_dir: /workdir
+    hostname: llvm-sandbox
+    tty: true
+    volumes:
+      - .:/workdir
