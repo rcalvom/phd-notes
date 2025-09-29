@@ -384,14 +384,25 @@ void DivZeroAnalysis::doAnalysis(Function &F, PointerAnalysis *PA) {
         WorkSet.insert(&(*I));
         PointerSet.insert(&(*I));
     }
+    int a = 0;
     while (!WorkSet.empty()) {
+        outs() << "\n## New iteration ## " << ++a << "\n";
         Instruction *instruction = WorkSet.front();
+        outs() << variable(instruction) << "\n";
         WorkSet.remove(instruction);
         Memory *Nout = new Memory();
         Nout = join(Nout, InMap[instruction]);
         flowIn(instruction, InMap[instruction]);
+        outs() << "IN:" << "\n";
+        for (auto m : *InMap[instruction]) {
+            outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
+        }
         transfer(instruction, InMap[instruction], Nout, PA, PointerSet);
         flowOut(instruction, OutMap[instruction], Nout, WorkSet);
+        outs() << "OUT:" << "\n";
+        for (auto m : *OutMap[instruction]) {
+            outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
+        }
     }
 }
 

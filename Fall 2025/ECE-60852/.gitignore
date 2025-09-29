@@ -1,2 +1,3 @@
 .venv/
+.vscode/
 **/assignment1/**/build
