@@ -97,6 +97,9 @@ void handleBinaryOperator(BinaryOperator *binary_operation, const Memory *In, Me
                                    : Domain::NonZero);
                 break;
             }
+            default:
+                result = new Domain(Domain::MaybeZero);
+                break;
         }
     } else {
         Domain *left_domain = nullptr;
@@ -132,6 +135,9 @@ void handleBinaryOperator(BinaryOperator *binary_operation, const Memory *In, Me
                 result = Domain::div(left_domain, right_domain);
                 break;
             }
+            default:
+                result = new Domain(Domain::MaybeZero);
+                break;
         }
     }
     if (result == nullptr) {
@@ -357,7 +363,6 @@ void DivZeroAnalysis::doAnalysis(Function &F) {
         flowIn(instruction, InMap[instruction]);
         transfer(instruction, InMap[instruction], Nout);
         flowOut(instruction, OutMap[instruction], Nout, WorkSet);
-
     }
 }
 
@@ -389,4 +394,4 @@ bool DivZeroAnalysis::check(Instruction *I) {
 
 char DivZeroAnalysis::ID = 1;
 static RegisterPass<DivZeroAnalysis> X("DivZero", "Divide-by-zero Analysis", false, false);
-}
+} // namespace dataflow

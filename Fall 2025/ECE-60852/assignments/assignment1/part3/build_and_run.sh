@@ -6,7 +6,8 @@ make clean
 make
 cd ../DivZero/test/
 
-SRC=pointer0
+SRC=pointer6
+# pointer4
 
 clang -emit-llvm -S -fno-discard-value-names -Xclang -disable-O0-optnone -c $SRC.c -o $SRC.opt.ll
 opt -load ../../build/DivZero/libDataflowPass.so -DivZero $SRC.opt.ll
