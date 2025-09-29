@@ -1,5 +1,4 @@
 #include "DivZeroAnalysis.h"
-#include "Domain.h"
 
 using namespace std;
 
@@ -51,11 +50,6 @@ bool equal(Memory *M1, Memory *M2) {
 void DivZeroAnalysis::flowIn(Instruction *I, Memory *In) {
     auto predecessors = getPredecessors(I);
     for (auto *predecesor : predecessors) {
-        // outs() << "Predecesor: "<< variable(predecesor) << "\n";
-        //   outs() << "IN (temp):" << "\n";
-        //   for (auto m : *OutMap[predecesor]) {
-        //       outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-        //   }
         In = join(In, OutMap[predecesor]);
     }
     InMap[I] = In;
@@ -149,16 +143,14 @@ void handleBinaryOperator(BinaryOperator *binary_operation, const Memory *In, Me
     if (result == nullptr) {
         result == new Domain(Domain::MaybeZero);
     }
-    NOut->erase(variable(binary_operation));
-    NOut->insert(pair<string, Domain *>(variable(binary_operation), result));
+    (*NOut)[variable(binary_operation)] = result;
 }
 
 void handleCastInstruction(CastInst *cast_instruction, const Memory *In, Memory *NOut) {
     Domain *domain = nullptr;
     auto it = In->find(variable(cast_instruction->getOperand(0)));
     domain = (it != In->end()) ? it->second : new Domain(Domain::Uninit);
-    NOut->erase(variable(cast_instruction));
-    NOut->insert(pair<string, Domain *>(variable(cast_instruction), domain));
+    (*NOut)[variable(cast_instruction)] = domain;
 }
 
 void handleCompareInstruction(CmpInst *compare_instruction, const Memory *In, Memory *NOut) {
@@ -284,8 +276,7 @@ void handleCompareInstruction(CmpInst *compare_instruction, const Memory *In, Me
             }
         }
     }
-    NOut->erase(variable(compare_instruction));
-    NOut->insert(pair<string, Domain *>(variable(compare_instruction), result));
+    (*NOut)[variable(compare_instruction)] = result;
 }
 
 void handleBranchInstruction(BranchInst *branch_instruction, const Memory *In, Memory *NOut) {
@@ -295,8 +286,7 @@ void handleBranchInstruction(BranchInst *branch_instruction, const Memory *In, M
 }
 
 void handleInputVar(Instruction *I, const Memory *In, Memory *NOut) {
-    NOut->erase(variable(I));
-    NOut->insert(pair<string, Domain *>(variable(I), new Domain(Domain::MaybeZero)));
+    (*NOut)[variable(I)] = new Domain(Domain::MaybeZero);
 }
 
 void handleStoreInstruction(StoreInst *store_instruction, const Memory *In, Memory *NOut,
@@ -329,11 +319,12 @@ void handleStoreInstruction(StoreInst *store_instruction, const Memory *In, Memo
         }
     }
     for (auto pointer : PointerSet) {
-        NOut->erase(variable(pointer));
-        NOut->insert(pair<string, Domain *>(variable(pointer), result_domain));
+        string pointer_variable = variable(pointer);
+        if (PA->alias(destination_variable, pointer_variable)) {
+            (*NOut)[variable(pointer)] = result_domain;
+        }
     }
-    NOut->erase(destination_name);
-    NOut->insert(pair<string, Domain *>(destination_name, result_domain));
+    (*NOut)[destination_name] = result_domain;
 }
 
 void handleLoadInstruction(LoadInst *load_instuction, const Memory *In, Memory *NOut) {
@@ -344,7 +335,7 @@ void handleLoadInstruction(LoadInst *load_instuction, const Memory *In, Memory *
                                                                         : variable(load_instuction);
     Domain *result =
         In->find(loaded_name) != In->end() ? In->at(loaded_name) : new Domain(Domain::Uninit);
-    NOut->insert(pair<string, Domain *>(destination_name, result));
+    (*NOut)[destination_name] = result;
 }
 
 void handleAllocaInstruction(AllocaInst *allocation_instruction, const Memory *In, Memory *NOut) {
@@ -376,35 +367,14 @@ void DivZeroAnalysis::transfer(Instruction *I, const Memory *In, Memory *NOut, P
 
 void DivZeroAnalysis::flowOut(Instruction *I, Memory *Pre, Memory *Post,
                               SetVector<Instruction *> &WorkSet) {
-    outs() << "PRE:" << "\n";
-    for (auto m : *Pre) {
-        outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-    }
-    outs() << "POST:" << "\n";
-    for (auto m : *Post) {
-        outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-    }
     if (!equal(Pre, Post)) {
-        outs() << "NOT EQUAL!!!\n";
-        outs() << "Size1: " << WorkSet.size() << "\n";
         WorkSet.insert(I);
-        outs() << "Size2: " << WorkSet.size() << "\n";
         auto sucessors = getSuccessors(I);
         for (auto *sucessor : sucessors) {
-            outs() << sucessor << "\n";
-            // WorkSet.remove(sucessor);
             WorkSet.insert(sucessor);
-            outs() << "Size3: " << WorkSet.size() << "\n";
         }
     }
     OutMap[I] = join(InMap[I], Post);
-}
-
-void instanciate_args(const Function &F) {
-    for (auto arg = F.arg_begin(); arg != F.arg_end(); ++arg) {
-        // Your code here, e.g.:
-        // outs() << arg->getName() << "\n";
-    }
 }
 
 void DivZeroAnalysis::doAnalysis(Function &F, PointerAnalysis *PA) {
@@ -414,36 +384,14 @@ void DivZeroAnalysis::doAnalysis(Function &F, PointerAnalysis *PA) {
         WorkSet.insert(&(*I));
         PointerSet.insert(&(*I));
     }
-    int a = 0;
-    instanciate_args(F);
     while (!WorkSet.empty()) {
-        outs() << "\n## New iteration ## " << a + 1 << "\n";
-        outs() << WorkSet.size() << "\n";
         Instruction *instruction = WorkSet.front();
         WorkSet.remove(instruction);
-        outs() << "Instruction: " << variable(instruction) << "\n";
         Memory *Nout = new Memory();
         Nout = join(Nout, InMap[instruction]);
         flowIn(instruction, InMap[instruction]);
-        outs() << "IN:" << "\n";
-        for (auto m : *InMap[instruction]) {
-            outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-        }
         transfer(instruction, InMap[instruction], Nout, PA, PointerSet);
-        // outs() << "NOUT(temp): \n";
-        // for (auto m : *Nout) {
-        //     outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-        // }
         flowOut(instruction, OutMap[instruction], Nout, WorkSet);
-        outs() << "OUT:" << "\n";
-        for (auto m : *OutMap[instruction]) {
-            outs() << "[" << m.first << ", " << m.second->Value << "] " << "\n";
-        }
-        outs() << "\n";
-        if (a++ == 100) {
-            outs() << "Does not finish\n";
-            exit(-1);
-        }
     }
 }
 

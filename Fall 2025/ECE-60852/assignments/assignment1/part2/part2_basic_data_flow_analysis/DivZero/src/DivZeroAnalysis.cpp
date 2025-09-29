@@ -143,16 +143,14 @@ void handleBinaryOperator(BinaryOperator *binary_operation, const Memory *In, Me
     if (result == nullptr) {
         result == new Domain(Domain::MaybeZero);
     }
-    NOut->erase(variable(binary_operation));
-    NOut->insert(pair<string, Domain *>(variable(binary_operation), result));
+    (*NOut)[variable(binary_operation)] = result;
 }
 
 void handleCastInstruction(CastInst *cast_instruction, const Memory *In, Memory *NOut) {
     Domain *domain = nullptr;
     auto it = In->find(variable(cast_instruction->getOperand(0)));
     domain = (it != In->end()) ? it->second : new Domain(Domain::Uninit);
-    NOut->erase(variable(cast_instruction));
-    NOut->insert(std::pair<std::string, Domain *>(variable(cast_instruction), domain));
+    (*NOut)[variable(cast_instruction)] = domain;
 }
 
 void handleCompareInstruction(CmpInst *compare_instruction, const Memory *In, Memory *NOut) {
@@ -278,8 +276,7 @@ void handleCompareInstruction(CmpInst *compare_instruction, const Memory *In, Me
             }
         }
     }
-    NOut->erase(variable(compare_instruction));
-    NOut->insert(pair<string, Domain *>(variable(compare_instruction), result));
+    (*NOut)[variable(compare_instruction)] = result;
 }
 
 void handleBranchInstruction(BranchInst *branch_instruction, const Memory *In, Memory *NOut) {
@@ -289,8 +286,7 @@ void handleBranchInstruction(BranchInst *branch_instruction, const Memory *In, M
 }
 
 void handleInputVar(Instruction *I, const Memory *In, Memory *NOut) {
-    NOut->erase(variable(I));
-    NOut->insert(pair<string, Domain *>(variable(I), new Domain(Domain::MaybeZero)));
+    (*NOut)[variable(I)] = new Domain(Domain::MaybeZero);
 }
 
 void handlePhiNode(PHINode *phi_node, const Memory *In, Memory *NOut) {
@@ -317,8 +313,7 @@ void handlePhiNode(PHINode *phi_node, const Memory *In, Memory *NOut) {
             result = Domain::join(result, V);
         }
     }
-    NOut->erase(variable(phi_node));
-    NOut->insert(std::pair<std::string, Domain *>(variable(phi_node), result));
+    (*NOut)[variable(phi_node)] = result;
 }
 
 void DivZeroAnalysis::transfer(Instruction *I, const Memory *In, Memory *NOut) {
