@@ -289,63 +289,34 @@ void handleInputVar(Instruction *I, const Memory *In, Memory *NOut) {
     (*NOut)[variable(I)] = new Domain(Domain::MaybeZero);
 }
 
-void handleStoreInstruction(StoreInst *store_instruction, const Memory *In, Memory *NOut,
-                            PointerAnalysis *PA, SetVector<Value *> PointerSet) {
-    Value *source_value = store_instruction->getOperand(0);
-    Value *destination_value = store_instruction->getOperand(1);
-    string source_name =
-        source_value->getType()->isPointerTy() ? address(source_value) : variable(source_value);
-    string destination_variable = variable(destination_value);
-
-    string destination_name = destination_value->getType()->isPointerTy()
-                                  ? address(destination_value)
-                                  : variable(destination_value);
-    Domain *source_domain = nullptr;
-    if (ConstantInt *source_constant = dyn_cast<ConstantInt>(source_value)) {
-        source_domain =
-            new Domain(source_constant->getSExtValue() == 0 ? Domain::Zero : Domain::NonZero);
+void handlePhiNode(PHINode *phi_node, const Memory *In, Memory *NOut) {
+    Value *cv = phi_node->hasConstantValue();
+    Domain *result = nullptr;
+    if (cv) {
+        ConstantInt *constant = dyn_cast<ConstantInt>(cv);
+        result = new Domain(constant->isZero() ? Domain::Zero : Domain::NonZero);
     } else {
-        source_domain =
-            In->find(source_name) != In->end() ? In->at(source_name) : new Domain(Domain::Uninit);
-    }
-    Domain *result_domain = source_domain;
-    for (auto pointer : PointerSet) {
-        string pointer_variable = variable(pointer);
-        if (PA->alias(destination_variable, pointer_variable)) {
-            Domain *pointer_domain = In->find(pointer_variable) != In->end()
-                                         ? In->at(pointer_variable)
-                                         : new Domain(Domain::Uninit);
-            result_domain = Domain::join(result_domain, pointer_domain);
+        unsigned int n = phi_node->getNumIncomingValues();
+        for (unsigned int i = 0; i < n; i++) {
+            Domain *V = nullptr;
+            auto value = phi_node->getIncomingValue(i);
+            if (ConstantInt *constant = dyn_cast<ConstantInt>(value)) {
+                V = new Domain(constant->isZero() ? Domain::Zero : Domain::NonZero);
+            } else if (In->find(variable(phi_node->getIncomingValue(i))) != In->end()) {
+                V = In->at(variable(phi_node->getIncomingValue(i)));
+            } else {
+                V = new Domain(Domain::Uninit);
+            }
+            if (!result) {
+                result = V;
+            }
+            result = Domain::join(result, V);
         }
     }
-    for (auto pointer : PointerSet) {
-        string pointer_variable = variable(pointer);
-        if (PA->alias(destination_variable, pointer_variable)) {
-            (*NOut)[variable(pointer)] = result_domain;
-        }
-    }
-    (*NOut)[destination_name] = result_domain;
+    (*NOut)[variable(phi_node)] = result;
 }
 
-void handleLoadInstruction(LoadInst *load_instuction, const Memory *In, Memory *NOut) {
-    Value *loaded_value = load_instuction->getPointerOperand();
-    string loaded_name =
-        loaded_value->getType()->isPointerTy() ? address(loaded_value) : variable(loaded_value);
-    string destination_name = load_instuction->getType()->isPointerTy() ? address(load_instuction)
-                                                                        : variable(load_instuction);
-    Domain *result =
-        In->find(loaded_name) != In->end() ? In->at(loaded_name) : new Domain(Domain::Uninit);
-    (*NOut)[destination_name] = result;
-}
-
-void handleAllocaInstruction(AllocaInst *allocation_instruction, const Memory *In, Memory *NOut) {
-    for (auto m : *In) {
-        NOut->insert(m);
-    }
-}
-
-void DivZeroAnalysis::transfer(Instruction *I, const Memory *In, Memory *NOut, PointerAnalysis *PA,
-                               SetVector<Value *> PointerSet) {
+void DivZeroAnalysis::transfer(Instruction *I, const Memory *In, Memory *NOut) {
     if (BinaryOperator *binary_operation = dyn_cast<BinaryOperator>(I)) {
         handleBinaryOperator(binary_operation, In, NOut);
     } else if (CastInst *cast_instruction = dyn_cast<CastInst>(I)) {
@@ -356,12 +327,8 @@ void DivZeroAnalysis::transfer(Instruction *I, const Memory *In, Memory *NOut, P
         handleBranchInstruction(branch_instruction, In, NOut);
     } else if (isInput(I)) {
         handleInputVar(I, In, NOut);
-    } else if (StoreInst *store_instruction = dyn_cast<StoreInst>(I)) {
-        handleStoreInstruction(store_instruction, In, NOut, PA, PointerSet);
-    } else if (LoadInst *load_instruction = dyn_cast<LoadInst>(I)) {
-        handleLoadInstruction(load_instruction, In, NOut);
-    } else if (AllocaInst *allocation_instruction = dyn_cast<AllocaInst>(I)) {
-        handleAllocaInstruction(allocation_instruction, In, NOut);
+    } else if (PHINode *phi_instruction = dyn_cast<PHINode>(I)) {
+        handlePhiNode(phi_instruction, In, NOut);
     }
 }
 
@@ -371,18 +338,17 @@ void DivZeroAnalysis::flowOut(Instruction *I, Memory *Pre, Memory *Post,
         WorkSet.insert(I);
         auto sucessors = getSuccessors(I);
         for (auto *sucessor : sucessors) {
+            WorkSet.remove(sucessor);
             WorkSet.insert(sucessor);
         }
     }
     OutMap[I] = join(InMap[I], Post);
 }
 
-void DivZeroAnalysis::doAnalysis(Function &F, PointerAnalysis *PA) {
+void DivZeroAnalysis::doAnalysis(Function &F) {
     SetVector<Instruction *> WorkSet;
-    SetVector<Value *> PointerSet;
     for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
         WorkSet.insert(&(*I));
-        PointerSet.insert(&(*I));
     }
     while (!WorkSet.empty()) {
         Instruction *instruction = WorkSet.front();
@@ -390,7 +356,7 @@ void DivZeroAnalysis::doAnalysis(Function &F, PointerAnalysis *PA) {
         Memory *Nout = new Memory();
         Nout = join(Nout, InMap[instruction]);
         flowIn(instruction, InMap[instruction]);
-        transfer(instruction, InMap[instruction], Nout, PA, PointerSet);
+        transfer(instruction, InMap[instruction], Nout);
         flowOut(instruction, OutMap[instruction], Nout, WorkSet);
     }
 }
