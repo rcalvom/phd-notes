@@ -1,8 +1,0 @@
-services:
-  llvm:
-    build: .
-    image: llvm-sandbox:latest
-    container_name: llvm-sandbox
-    tty: true
-    volumes:
-      - .:/workspace
