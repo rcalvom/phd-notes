@@ -1,7 +1,7 @@
 ; 
 (set-info :status unknown)
-(declare-fun R5 () Int)
+(declare-fun R4 () Int)
 (assert
- (let (($x12 (= R5 1024)))
- (= $x12 false)))
+ (let (($x13 (< R4 0)))
+ (= $x13 false)))
 (check-sat)

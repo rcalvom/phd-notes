@@ -21,5 +21,5 @@ cd /workdir/LLVMBasedDSE/DSE/test || exit 1
 clang -emit-llvm -S -fno-discard-value-names -c $SRC.c
 opt -load ../../build/DSE/libInstrumentPass.so -Instrument -S $SRC.ll -o $SRC.instrumented.ll
 clang -o $SRC -L../../build/DSE -lruntime $SRC.instrumented.ll
-../../build/DSE/dse ./$SRC N
-timeout 10 ../../build/DSE/dse ./$SRC 5
+../../build/DSE/dse ./$SRC 2
+#timeout 10 ../../build/DSE/dse ./$SRC
