@@ -1,7 +1,16 @@
 
+## Holistic Software Security ##
+# LLVM Playground
 [submodule "Fall 2025/ECE-60852/assignments/assignment1/LLVMPlayground"]
 	path = Fall 2025/ECE-60852/assignments/assignment1/LLVMPlayground
 	url = https://github.com/HolisticSoftwareSecurity/LLVMPlayground
+
+# Dynamic Symbolic Execution engine
 [submodule "Fall 2025/ECE-60852/assignments/assignment2/DynamicSymbolicExecution"]
 	path = Fall 2025/ECE-60852/assignments/assignment2/DynamicSymbolicExecution
 	url = https://github.com/HolisticSoftwareSecurity/DynamicSymbolicExecution.git
+
+# CodeQL Sources
+[submodule "Fall 2025/ECE-60852/assignments/assignment3/codeql"]
+	path = Fall 2025/ECE-60852/assignments/assignment3/codeql
+	url = https://github.com/github/codeql.git
