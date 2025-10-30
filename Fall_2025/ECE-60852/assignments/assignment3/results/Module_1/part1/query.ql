@@ -1,11 +1,17 @@
 import cpp
 
-from Variable var, FunctionCall call
+from 
+  AssignAddExpr aae, 
+  FunctionCall fc, 
+  VariableAccess va1, 
+  VariableAccess va2
 where
-  call.getTarget().hasName("snprintf") and
-  call.getArgument(0).getUnderlyingVariable() = var and
-  exists(AssignExpr assign |
-    assign.getAnOperand() = var and
-    assign.getAnOperand() = call and
-    assign.getOperator() = "+=")
-select assign, "Variable used as destination and LHS in snprintf: " + var.getName()
+  aae.getRValue() = fc and
+  fc.getArgument(0) = va1 and
+  fc.getTarget().getName() = "snprintf" and
+  aae.getLValue() = va2 and
+  va1.getTarget() = va2.getTarget()
+select
+  aae.getFile().getRelativePath(),
+  aae.getLocation().getStartLine(),
+  aae.getLocation().getStartColumn()
