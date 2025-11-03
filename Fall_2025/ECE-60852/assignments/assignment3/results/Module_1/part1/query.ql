@@ -1,17 +1,39 @@
 import cpp
+import semmle.code.cpp.dataflow.new.DataFlow
+
+module TroubleSnprintfConfiguration implements DataFlow::ConfigSig {
+    
+    predicate isSource(DataFlow::Node source) {
+        exists(FunctionCall functionCall |
+            source.asExpr() = functionCall and
+            functionCall.getTarget().hasName("snprintf")
+        )
+    }
+
+    predicate isSink(DataFlow::Node sink) {
+        exists(AssignOperation assign |
+            sink.asExpr() = assign.getRValue()
+        )
+    }
+}
+
+module TroubleSnprintfFlow = DataFlow::Global<TroubleSnprintfConfiguration>;
 
 from 
-  AssignAddExpr aae, 
-  FunctionCall fc, 
-  VariableAccess va1, 
-  VariableAccess va2
+    DataFlow::Node source,
+    DataFlow::Node sink,
+    AssignOperation assign,
+    FunctionCall functionCall,
+    VariableAccess variableAccess1,
+    VariableAccess variableAccess2
 where
-  aae.getRValue() = fc and
-  fc.getArgument(0) = va1 and
-  fc.getTarget().getName() = "snprintf" and
-  aae.getLValue() = va2 and
-  va1.getTarget() = va2.getTarget()
-select
-  aae.getFile().getRelativePath(),
-  aae.getLocation().getStartLine(),
-  aae.getLocation().getStartColumn()
+    TroubleSnprintfFlow::flow(source, sink) and
+    source.asExpr() = functionCall and
+    sink.asExpr() = assign.getRValue() and
+    functionCall.getArgument(0) = variableAccess1 and
+    assign.getLValue() = variableAccess2 and
+    variableAccess1.getTarget() = variableAccess2.getTarget()
+select 
+    assign,
+    source,
+    sink
