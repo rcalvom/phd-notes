@@ -1,13 +1,34 @@
 import cpp
+import semmle.code.cpp.dataflow.new.DataFlow
+
+module StringFormattingConfiguration implements DataFlow::ConfigSig {
+    
+    predicate isSource(DataFlow::Node source) {
+        exists(StringLiteral stringLiteral |
+            source.asExpr() = stringLiteral and
+            stringLiteral.getValue().matches("%%%s%")
+        )
+    }
+
+    predicate isSink(DataFlow::Node sink) {
+        exists(FunctionCall functionCall |
+            functionCall.getTarget().getName() in ["sprintf", "sscanf", "fscanf"] and 
+            functionCall.getNumberOfArguments() > 1 and
+            sink.asExpr() = functionCall.getArgument(1)
+        )
+    }
+}
+
+module StringFormattingFlow = DataFlow::Global<StringFormattingConfiguration>;
 
 from 
-  FunctionCall fc, 
-  StringLiteral sl
+    DataFlow::Node source,
+    DataFlow::Node sink,
+    FunctionCall functionCall
 where
-  fc.getTarget().getName() in ["sprintf", "sscanf", "fscanf"] and
-  fc.getArgument(1) = sl and
-  sl.getValue().matches("%%%s%")
+    StringFormattingFlow::flow(source, sink) and
+    sink.asExpr().getParent() = functionCall
 select 
-  fc.getFile().getRelativePath(), 
-  fc.getLocation().getStartLine(),
-  fc.getLocation().getStartColumn()
+    functionCall.getFile().getRelativePath(), 
+    functionCall.getLocation().getStartLine(),
+    functionCall.getLocation().getStartColumn()

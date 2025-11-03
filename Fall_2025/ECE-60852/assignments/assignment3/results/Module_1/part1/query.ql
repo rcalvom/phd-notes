@@ -34,6 +34,6 @@ where
     assign.getLValue() = variableAccess2 and
     variableAccess1.getTarget() = variableAccess2.getTarget()
 select 
-    assign,
-    source,
-    sink
+    assign.getFile().getRelativePath(), 
+    assign.getLocation().getStartLine(),
+    assign.getLocation().getStartColumn()

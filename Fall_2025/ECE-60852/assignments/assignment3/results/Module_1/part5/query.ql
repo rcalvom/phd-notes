@@ -1,18 +1,32 @@
 import cpp
 import semmle.code.cpp.dataflow.new.DataFlow
 
+module DoubleFreeConfiguration implements DataFlow::ConfigSig {
+    
+    predicate isSource(DataFlow::Node source) {
+        exists(FunctionCall functionCall |
+            functionCall.getTarget().hasName("free") and
+            source.asExpr() = functionCall.getArgument(0)
+        )
+    }
+
+
+    predicate isSink(DataFlow::Node sink) {
+        exists(FunctionCall functionCall |
+            functionCall.getTarget().hasName("free") and
+            sink.asExpr() = functionCall.getArgument(0)
+        )
+    }
+}
+
+module DoubleFreeFlow = DataFlow::Global<DoubleFreeConfiguration>;
+
 from 
-  AssignExpr ae, 
-  FunctionCall fc, 
-  FieldAccess fa1, 
-  FieldAccess fa2
+    DataFlow::Node source,
+    DataFlow::Node sink
 where
-  ae.getLValue() = fa1 and
-  ae.getRValue() = fc and
-  fc.getTarget().getName() = "realloc" and
-  fc.getArgument(0) = fa2 and
-  fa1.getTarget() = fa2.getTarget()
+    DoubleFreeFlow::flow(source, sink) and
+    source != sink
 select 
-  ae.getFile().getRelativePath(), 
-  ae.getLocation().getStartLine(),
-  ae.getLocation().getStartColumn()
+    source,
+    sink
