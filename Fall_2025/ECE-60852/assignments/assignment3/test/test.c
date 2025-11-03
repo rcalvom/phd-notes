@@ -7,19 +7,25 @@ void part1() {
     n = snprintf(buffer, 1, "%i", 1); // Part1
     buffer += n;
     buffer += snprintf(buffer, 1, "%i", 1); // Part1
-    snprintf(buffer, 1, "%i", 1); // Not detected
+    snprintf(buffer, 1, "%i", 1);           // Not detected
 }
 
 void part2() {
     char *buffer;
+    char *fmt1 = "%s%i";
+    char *fmt2 = "%i";
+
     sprintf(buffer, "%s%i", "", 1); // Part2
-    sprintf(buffer, "%i", "", 1); // Not detected
+    sprintf(buffer, "%i", "", 1);   // Not detected
 
     sscanf(buffer, "%s%i", "", 1); // Part2
-    sscanf(buffer, "%i", "", 1); // Not detected
+    sscanf(buffer, "%i", "", 1);   // Not detected
 
-    fscanf((FILE*)buffer, "%s%i", "", 1); // Part2
-    fscanf((FILE*)buffer, "%i", "", 1); // Not detected
+    fscanf((FILE *)buffer, "%s%i", "", 1); // Part2
+    fscanf((FILE *)buffer, "%i", "", 1);   // Not detected
+
+    sprintf(buffer, fmt1, "", 1); // Part2
+    sprintf(buffer, fmt2, "", 1); // Not detected
 }
 
 void part3() {}
