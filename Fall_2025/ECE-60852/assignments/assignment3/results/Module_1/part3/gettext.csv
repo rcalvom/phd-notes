@@ -1,0 +1,15 @@
+"gettext-runtime/gnulib-lib/malloc/scratch_buffer_grow_preserve.c",63,3
+"gettext-runtime/gnulib-lib/printf-parse.c",251,15
+"gettext-runtime/gnulib-lib/printf-parse.c",309,19
+"gettext-runtime/gnulib-lib/printf-parse.c",648,17
+"gettext-runtime/gnulib-lib/printf-parse.c",673,15
+"gettext-runtime/gnulib-lib/string-buffer.c",84,7
+"gettext-runtime/intl/dcigettext.c",1022,6
+"gettext-runtime/intl/gnulib-lib/printf-parse.c",251,15
+"gettext-runtime/intl/gnulib-lib/printf-parse.c",309,19
+"gettext-runtime/intl/gnulib-lib/printf-parse.c",648,17
+"gettext-runtime/intl/gnulib-lib/printf-parse.c",673,15
+"gettext-runtime/libasprintf/gnulib-lib/printf-parse.c",251,15
+"gettext-runtime/libasprintf/gnulib-lib/printf-parse.c",309,19
+"gettext-runtime/libasprintf/gnulib-lib/printf-parse.c",648,17
+"gettext-runtime/libasprintf/gnulib-lib/printf-parse.c",673,15

@@ -6,7 +6,8 @@ module TaintedMultiplicationConfiguration implements DataFlow::ConfigSig {
     predicate isSource(DataFlow::Node source) {
         exists(AllocationFunction allocationFunction, FunctionCall functionCall |
             functionCall.getTarget() = allocationFunction and
-            source.asExpr() = functionCall
+            source.asExpr() = functionCall and
+            functionCall.getArgument(allocationFunction.getSizeArg()) instanceof MulExpr
         )
     }
 
@@ -33,7 +34,7 @@ where
     functionCall.getArgument(0) = fieldAccess1 and
     assign.getLValue() = fieldAccess2 and
     fieldAccess1.getTarget() = fieldAccess2.getTarget()
-select 
+select
     assign.getFile().getRelativePath(), 
     assign.getLocation().getStartLine(),
     assign.getLocation().getStartColumn()

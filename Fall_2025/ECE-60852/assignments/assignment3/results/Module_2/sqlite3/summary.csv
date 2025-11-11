@@ -1,0 +1,10 @@
+Query,Total Errors,True Positives,False Positives,Errors Acknowledged
+cpp/sql-injection,3,,,
+cpp/toctou-race-condition,2,,,
+cpp/integer-multiplication-cast-to-long,7,,,
+cpp/offset-use-before-range-check,5,,,
+cpp/suspicious-allocation-size,2,,,
+cpp/uncontrolled-process-operation,2,,,
+cpp/world-writable-file-creation,2,,,
+cpp/path-injection,10,,,
+cpp/type-confusion,1,,,

@@ -28,5 +28,6 @@ where
     DoubleFreeFlow::flow(source, sink) and
     source != sink
 select 
-    source,
-    sink
+    sink.asExpr().getFile().getRelativePath(), 
+    sink.asExpr().getLocation().getStartLine(),
+    sink.asExpr().getLocation().getStartColumn()

@@ -6,7 +6,7 @@ module StringFormattingConfiguration implements DataFlow::ConfigSig {
     predicate isSource(DataFlow::Node source) {
         exists(StringLiteral stringLiteral |
             source.asExpr() = stringLiteral and
-            stringLiteral.getValue().matches("%%%s%")
+            stringLiteral.getValue().matches("%\\%s%")
         )
     }
 
@@ -28,7 +28,7 @@ from
 where
     StringFormattingFlow::flow(source, sink) and
     sink.asExpr().getParent() = functionCall
-select 
+select
     functionCall.getFile().getRelativePath(), 
     functionCall.getLocation().getStartLine(),
     functionCall.getLocation().getStartColumn()
