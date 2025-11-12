@@ -1,7 +1,7 @@
 Query,Total Errors,True Positives,False Positives,Errors Acknowledged
-cpp/alloca-in-loop,2,,,
+cpp/alloca-in-loop,2,0,2,0
 cpp/overflowing-snprintf,5,,,
-cpp/non-constant-format,2,,,
+cpp/non-constant-format,2,0,2,0
 cpp/toctou-race-condition,2,,,
 cpp/unsafe-strcat,1,,,
 cpp/missing-check-scanf,14,,,
@@ -12,6 +12,6 @@ cpp/comparison-with-wider-type,4,,,
 cpp/unbounded-write,4,,,
 cpp/overrunning-write,6,,,
 cpp/suspicious-pointer-scaling-void,3,,,
-cpp/suspicious-pointer-scaling,1,,,
+cpp/suspicious-pointer-scaling,1,0,1,0
 cpp/world-writable-file-creation,3,,,
 cpp/path-injection,8,,,

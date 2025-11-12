@@ -1,1 +1,12 @@
-Query,Total Errors,True Positives,False Positives,Errors Acknowledged
+cpp/toctou-race-condition,pshell.c:681.12
+cpp/integer-multiplication-cast-to-long,sqlite3.c:189704.14
+cpp/integer-multiplication-cast-to-long,sqlite3.c:189708.14
+cpp/integer-multiplication-cast-to-long,sqlite3.c:189713.14
+cpp/integer-multiplication-cast-to-long,sqlite3.c:187356.56
+cpp/integer-multiplication-cast-to-long,sqlite3.c:187196.60
+cpp/integer-multiplication-cast-to-long,sqlite3.c:167375.22
+cpp/integer-multiplication-cast-to-long,sqlite3.c:167378.22
+cpp/offset-use-before-range-check,shell.c:2491.13
+cpp/offset-use-before-range-check,shell.c:18866.25
+cpp/uncontrolled-process-operation,shell.c:19503.23
+cpp/uncontrolled-process-operation,shell.c:20373.21

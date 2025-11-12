@@ -1,2 +1,2 @@
 Query,Total Errors,True Positives,False Positives,Errors Acknowledged
-cpp/world-writable-file-creation,1,,,
+cpp/world-writable-file-creation,1,0,1,0

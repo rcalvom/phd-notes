@@ -1,9 +1,9 @@
 Query,Total Errors,True Positives,False Positives,Errors Acknowledged
-cpp/non-constant-format,1,,,
-cpp/incorrectly-checked-scanf,1,,,
-cpp/use-after-free,1,,,
-cpp/command-line-injection,1,,,
-cpp/toctou-race-condition,5,,,
+cpp/non-constant-format,1,0,1,0
+cpp/incorrectly-checked-scanf,1,0,1,0
+cpp/use-after-free,1,0,1,0
+cpp/command-line-injection,1,1,0,0
+cpp/toctou-race-condition,5,0,5,0
 cpp/offset-use-before-range-check,6,,,
 cpp/missing-check-scanf,10,,,
 cpp/uncontrolled-process-operation,6,,,

@@ -3,7 +3,7 @@
 # System
 import json
 
-SARIF_FILE = "results/Module_2/sqlite3/codeqlresults.sarif"
+SARIF_FILE = "results/Module_2/cups/codeqlresults.sarif"
 
 
 def generate_summary(sarif_file: str) -> dict:
@@ -20,11 +20,27 @@ def generate_summary(sarif_file: str) -> dict:
     return summary
 
 
+def print_errors(sarif_file:  str) -> None:
+    """Print the error an their locations"""
+    with open(sarif_file, "r", encoding="utf-8") as file:
+        data = json.loads(file.read())
+    for run in data["runs"]:
+        for result in run["results"]:
+            rule_id = result["ruleId"]
+            if len(result["locations"]) != 1:
+                print("ERROR in locations size")
+            file_path = result["locations"][0]["physicalLocation"]["artifactLocation"]["uri"]
+            line = result["locations"][0]["physicalLocation"]["region"]["startLine"]
+            column = result["locations"][0]["physicalLocation"]["region"]["startColumn"]
+            print(f"Error '{rule_id}'. {file_path}:{line}.{column}")
+
+
 def main():
     """Entry point"""
-    report = generate_summary(SARIF_FILE)
-    for key, value in report.items():
-        print(f"{key},{value},,,")
+    # report = generate_summary(SARIF_FILE)
+    # for key, value in report.items():
+    #     print(f"{key},{value},,,")
+    print_errors(SARIF_FILE)
 
 
 if __name__ == "__main__":

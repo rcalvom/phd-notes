@@ -1,1 +1,6 @@
-Query,Total Errors,True Positives,False Positives,Errors Acknowledged
+cpp/command-line-injection,locale/strings2po.c:70.24
+cpp/offset-use-before-range-check,cgi-bin/ipp-var.c:45.17 *
+cpp/uncontrolled-process-operation,backend/dnssd.c:787.9 *
+cpp/uncontrolled-process-operation,scheduler/cups-exec.c:181.9
+cpp/uncontrolled-process-operation,scheduler/main.c:493.12
+cpp/comparison-with-wider-type,backend/usb-libusb.c:882.9
