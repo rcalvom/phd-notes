@@ -2,7 +2,7 @@ Query,Total Errors,True Positives,False Positives,Errors Acknowledged
 cpp/cleartext-transmission,2,0,2,0
 cpp/weak-cryptographic-algorithm,1,0,1,0
 cpp/toctou-race-condition,2,0,2,0
-cpp/unsafe-strcat,2,0,2,1
+cpp/unsafe-strcat,2,0,2,0
 cpp/incorrect-not-operator-usage,5,0,5,0
 cpp/integer-multiplication-cast-to-long,2,0,2,0
 cpp/offset-use-before-range-check,2,0,2,0

@@ -1,7 +1,7 @@
 type,location
 cpp/toctou-race-condition,Utilities/cmlibarchive/libarchive/archive_write_disk_posix.c:3241.7
 cpp/toctou-race-condition,Utilities/cmlibuv/src/unix/pipe.c:375.7
-cpp/unsafe-strcat,Source/cmsys/SharedForward.h:788.9 *
+cpp/unsafe-strcat,Source/cmsys/SharedForward.h:788.9
 cpp/integer-multiplication-cast-to-long,Utilities/cmbzip2/bzlib.c:104.23
 cpp/integer-multiplication-cast-to-long,Utilities/cmzlib/zutil.c:306.46
 cpp/comparison-with-wider-type,Utilities/cmbzip2/decompress.c:311.22
