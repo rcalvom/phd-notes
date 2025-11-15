@@ -1,0 +1,12 @@
+type,location
+cpp/unsafe-strcat,lib/hci.c:316.2
+cpp/uncontrolled-process-operation,monitor/display.c:147.11
+cpp/comparison-with-wider-type,src/main.c:355.14
+cpp/comparison-with-wider-type,src/shared/ad.c:80.9
+cpp/comparison-with-wider-type,tools/btmgmt.c:600.9
+cpp/comparison-with-wider-type,tools/btmgmt.c:572.9
+cpp/unbounded-write,monitor/packet.c:398.6
+cpp/unbounded-write,monitor/packet.c:432.7
+cpp/overrunning-write,monitor/packet.c:11712.2
+cpp/overrunning-write,monitor/packet.c:11665.2
+cpp/overrunning-write,monitor/packet.c:11616.2

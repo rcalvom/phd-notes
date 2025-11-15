@@ -1,3 +1,4 @@
+type,location
 cpp/toctou-race-condition,pshell.c:681.12
 cpp/integer-multiplication-cast-to-long,sqlite3.c:189704.14
 cpp/integer-multiplication-cast-to-long,sqlite3.c:189708.14

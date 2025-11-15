@@ -1,6 +1,16 @@
+type,location
 cpp/command-line-injection,locale/strings2po.c:70.24
 cpp/offset-use-before-range-check,cgi-bin/ipp-var.c:45.17 *
-cpp/uncontrolled-process-operation,backend/dnssd.c:787.9 *
+cpp/uncontrolled-process-operation,locale/strings2po.c:70.24
 cpp/uncontrolled-process-operation,scheduler/cups-exec.c:181.9
 cpp/uncontrolled-process-operation,scheduler/main.c:493.12
 cpp/comparison-with-wider-type,backend/usb-libusb.c:882.9
+cpp/path-injection,backend/lpd.c:469.21
+cpp/path-injection,backend/socket.c:140.26
+cpp/path-injection,backend/usb.c:222.26
+cpp/path-injection,filter/rastertoepson.c:1010.20
+cpp/path-injection,filter/rastertohp.c:679.20
+cpp/path-injection,filter/rastertolabel.c:1132.20
+cpp/path-injection,filter/rastertopwg.c:66.20
+cpp/path-injection,locale/strings2po.c:76.19
+cpp/path-injection,monitor/bcp.c:61.20

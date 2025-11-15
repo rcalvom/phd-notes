@@ -3,7 +3,7 @@
 # System
 import json
 
-SARIF_FILE = "results/Module_2/cups/codeqlresults.sarif"
+SARIF_FILE = "results/Module_2/bluez/codeqlresults.sarif"
 
 
 def generate_summary(sarif_file: str) -> dict:
