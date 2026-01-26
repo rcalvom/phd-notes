@@ -1,4 +1,4 @@
-### Question 1b ###
+### Question 1d ###
 
 # Libraries
 library(faraway)

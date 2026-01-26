@@ -13,4 +13,4 @@ model <- lm(lpsa ~ lcavol, data = prostate)
 summary(model)
 
 # Print the R-squared value
-print(paste("The R-squared:", summary(model)$r.squared))
+print(paste("The R-squared estimator:", summary(model)$r.squared))

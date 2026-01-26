@@ -13,4 +13,4 @@ model <- lm(lpsa ~ lcavol + lweight + svi + lbph + age + lcp + pgg45 + gleason, 
 summary(model)
 
 # Print the R-squared value
-print(paste("The R-squared of the multiple linear model is:", summary(model)$r.squared))
+print(paste("The R-squared estimator:", summary(model)$r.squared))
