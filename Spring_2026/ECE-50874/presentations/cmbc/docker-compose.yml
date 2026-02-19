@@ -1,0 +1,10 @@
+services:
+  cbmc:
+    build: .
+    image: cbmc-sandbox:latest
+    container_name: cbmc-sandbox-container
+    working_dir: /workdir
+    hostname: cbmc-sandbox
+    tty: true
+    volumes:
+      - ./workdir:/workdir

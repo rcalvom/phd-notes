@@ -1,0 +1,4 @@
+Hi, I'm interested in developing diverse software implementations of a spec. I am thinking about ways to prompt you that will increase the variation in the implementations. I am wondering about programming language and library selection (vs. custom implementations of components). Are there other things I should think about? Please give concrete strategies and examples, and explain how each strategy might affect the diversity of failure modes
+
+
+The full spec is available as a file in your context. Can we start with a system design? I want the design to have an NDJSON parser, an analysis engine, and an output writer. I would also like to use a database to store intermediate computations, so that the tax computation pipeline is explicit and debuggable. Please propose a modular architecture and data model first, before writing any code. Then, after I confirm, we will implement the modules one at a time.
