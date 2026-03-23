@@ -55,10 +55,9 @@ class SessionImpl:
     def _connect(self) -> None:
         if self._state != "DISCONNECTED":
             raise ValueError("connect invalid unless DISCONNECTED")
-        # DEFECT #1: wrong next state (should be CONNECTED)
-        self._state = "AUTHED"
+        self._state = "CONNECTED"
         self._ping_count = 0
-        self._log("connect: DISCONNECTED -> AUTHED   (BUG: should be CONNECTED)")
+        self._log("connect: DISCONNECTED -> CONNECTED   (BUG: should be CONNECTED)")
 
     def _disconnect(self) -> None:
         if self._state != "CONNECTED":
@@ -88,10 +87,9 @@ class SessionImpl:
     def _logout(self) -> None:
         if self._state != "AUTHED":
             raise ValueError("logout invalid unless AUTHED")
-        # DEFECT #2: wrong next state (should be CONNECTED)
-        self._state = "DISCONNECTED"
+        self._state = "CONNECTED"
         self._ping_count = 0
-        self._log("logout: AUTHED -> DISCONNECTED   (BUG: should be CONNECTED)")
+        self._log("logout: AUTHED -> CONNECTED   (BUG: should be CONNECTED)")
 
     def _timeout(self) -> None:
         if self._state != "AUTHED":

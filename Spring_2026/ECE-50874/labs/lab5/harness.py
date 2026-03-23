@@ -14,7 +14,8 @@ from dataclasses import dataclass
 from collections import deque
 from typing import Deque, List, Set, Tuple
 
-from model import DFA, Event, State, MODEL
+from implementation import SessionImpl
+from model import DFA, Event, State, MODEL, run
 
 
 @dataclass(frozen=True)
@@ -39,12 +40,29 @@ def bfs_paths(dfa: DFA, k: int) -> Tuple[List[List[Event]], Set[State]]:
       sequences: list of event sequences of length <= k
       reached:   set of states reached within depth k
     """
-    # TODO (students): implement k-bounded BFS.
-    # Suggested approach:
-    #   - Initialize queue with (dfa.initial_state, [])
-    #   - Pop from queue, expand by enabled events if len(seq) < k
-    #   - Append each new sequence to sequences, add next_state to reached
-    raise NotImplementedError("TODO: implement bfs_paths(dfa, k)")
+    reached = set()
+    queue = deque()
+
+    reached.add(dfa.initial)
+    if k <= 0:
+        return [], reached
+
+    queue.append((dfa.initial, ()))
+    seq_tuples = []
+
+    while queue:
+        state, seq = queue.popleft()
+        if len(seq) >= k:
+            continue
+
+        for event in dfa.enabled_events(state):
+            next_state = dfa.step(state, event)
+            next_seq = seq + (event,)
+            seq_tuples.append(next_seq)
+            reached.add(next_state)
+            queue.append((next_state, next_seq))
+
+    return [list(seq) for seq in seq_tuples], reached
 
 
 def reachable_states(dfa: DFA) -> Set[State]:
@@ -81,6 +99,23 @@ def main() -> None:
 
     print(f"k-bounded reached states: {len(reached)}")
     print(f"Generated sequences: {len(sequences)}")
+    #print(f"States: {reached}")
+    #print(f"Sequences: {sequences}")
+    
+    for sequence in sequences:
+        final_state = run(sequence)
+        impl = SessionImpl()
+        success = True
+        for event in sequence:
+            try:
+                impl.apply(event)
+            except ValueError:
+                success = False
+        if final_state != impl.state:
+            success = False
+        if not success:
+            print(f"Sequence: {sequence} | DFA final: {final_state} | Impl final: {impl.state}")
+            print(impl.log)
 
 
 if __name__ == "__main__":
