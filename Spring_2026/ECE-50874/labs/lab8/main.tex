@@ -1,0 +1,298 @@
+\clearpage
+\begin{center}
+  {\Large\bfseries In-Class Lab}\\[0.5em]
+\end{center}
+\vspace{1em}
+
+\section{In-Class Lab: HARP-Style Dependency Regeneration (40 minutes)}
+
+\subsection{Goal}
+
+% The goal of this lab is to imitate the \textit{intention} of HARP: use LLMs to generate
+% replacement implementations of selected dependencies, then validate whether those replacements
+% are sufficient for downstream use.
+
+The goal of this lab is to apply the core principles of HARP (Highly Automated Replacement of Packages): leveraging LLMs to regenerate functional implementations of existing dependencies and verifying their suitability for production use through rigorous validation.
+
+Your goal is \textbf{not} merely to generate code. That is not engineering.
+Your goal is to determine whether a generated implementation is acceptable by reference to
+explicit success criteria and empirical evidence.
+
+\subsection{Ground Rules}
+
+\begin{itemize}
+    \item You must document every prompt or instruction you give the model in your \texttt{experiment-logbook.md}.
+    \item You may iterate: inspect failures, feed error output back to the model, and re-prompt.
+    \item You may edit generated code manually, but \textbf{every such edit must be documented} in your \texttt{experiment-logbook.md}.
+    \item You may use original library source code as \emph{input material} only when a task explicitly permits it.
+          However, you may \textbf{not} wrap, copy, or reuse source code from the original libraries in your submitted replacement implementation.
+          Only test suites may be reused.
+\end{itemize}
+
+\subsection{Tasks}
+
+\subsubsection{Task 1: Regenerate \texttt{string-compare} \textnormal{\textit{(10 minutes)}}}
+
+Use your LLM-based workflow to generate a complete replacement implementation of
+\textbf{\texttt{string-compare}}.
+
+For this task, you may \textbf{only} provide the model with the library documentation and
+test cases. You may not provide the source code.
+
+Your goal is to produce a replacement such that:
+\begin{enumerate}
+    \item the \texttt{string-compare} test suite passes, and
+    \item the \texttt{DEMO} application test suite passes.
+\end{enumerate}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=black,boxrule=0.5pt]
+\textbf{Deliverable 1 (\texttt{string-compare} Regeneration)}
+
+Record the relevant details of this task in your \texttt{experiment-logbook.md}.
+At a minimum, your logbook must include:
+\begin{itemize}
+    \item the prompts or instructions you used (copy/paste is fine),
+    \item the number of prompting iterations,
+    \item any major prompt changes between iterations,
+    \item any manual edits made to generated code, and why,
+    \item whether success was achieved, and
+    \item what failures remained if you did not fully succeed.
+\end{itemize}
+In your submission, briefly report the outcome of the task, including whether or not it worked, any failed strategies or major obstacles, and any observations or insights that seemed important to eventual success or failure, rather than repeating all raw process details in full.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+This is my prompt:
+
+\begin{alltt}
+Hello! I am a software engineer and I need to recreate the implementation for string-compare
+functions you will be able to find the string-compare tests in the file
+tests/string-compare.test.js, please create a implementation for that function that will
+have the tests running in success, please help me with this task.
+Please create the implementation of this function so that the TODO: in line 26 of the test file 
+can be uncommented, the line 27 commented and the tests are validades sucessfully. It 
+is importat that you only use the information of the unit test to infer the implementation do
+not check online the source code
+
+\end{alltt}
+Then this was the Codex output:
+\begin{alltt}
+I’m going to infer the required behavior strictly from the unit tests, inspect the existing 
+test and helper files, then implement the missing function and run the relevant tests locally.
+# Explored 2 files, 1 list, ran 1 command
+I’ve confirmed the active test file defines the contract directly, and there is no local 
+implementation file yet at tests/string-compare.js. I’m checking the rest of the suite and the 
+project setup before writing the module in the location the test expects.
+#Explored 2 files, 1 list
+The observed contract points to a case-insensitive similarity scorer that is symmetric only when
+lengths match and asymmetric otherwise. I’m going to validate the current Jest setup, then I’ll
+add a local CommonJS implementation in tests/string-compare.js that matches
+that contract.
+# Ran 1 command
+I’m editing two places now: switching the test to the local implementation path, and
+adding a tests/string-compare.js module that matches the contract implied by the suite.
+# Created 1 file, edited 1 file
+The local module is in place and the suite now points at it. I’m running the string-compare test
+file against the regenerated implementation to verify the contract end-to-end.
+# Ran 1 command
+The first pass failed one symmetry check because unrelated pairs with different lengths 
+collapsed to the same 0 score. I’m tightening the scoring formula so order-dependent length 
+differences still produce distinct values while keeping the result in [0, 1].
+# Edited 1 file
+I’ve adjusted the scorer to stay asymmetric for unequal-length inputs without flattening 
+dissimilar pairs to the same value. Running the suite again now.
+# Ran 1 command
+The regenerated implementation now passes the visible string-compare suite with the test 
+file pointed at the local module. I’m pulling the final line references so you can review the
+exact changes quickly.
+# Explored 2 files
+Implemented the local module at tests/string-compare.js (line 1) and switched the suite to 
+use it at tests/string-compare.test.js (line 26). I inferred the behavior only from the test
+file: case-insensitive exact matches return 1, empty vs non-empty returns 0, and all other cases
+use an order-sensitive Levenshtein-based similarity score so equal-length pairs are symmetric 
+while different-length pairs can differ.
+Verified locally with npx jest tests/string-compare.test.js --runInBand: 27/27 tests passed.
+\end{alltt}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+Other comments from the process:
+\begin{itemize}
+    \item All the tests passed.
+    \item I checked the real implementation of the function, and the regenerated one is very different from the original.
+    \item Codex used its tools only 9 times.
+    
+\end{itemize}
+\end{tcolorbox}
+
+\subsubsection{Task 2: Regenerate \texttt{chalk} \textnormal{\textit{(20 minutes)}}}
+
+Repeat the regeneration process for \textbf{\texttt{chalk}}.
+
+For this task, you \textbf{may} provide the model with the library source code in addition to
+documentation and test cases.
+
+Your goal is to produce a replacement such that:
+\begin{enumerate}
+    \item the \texttt{chalk} test suite passes, and
+    \item the \texttt{DEMO} application test suite passes.
+\end{enumerate}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=black,boxrule=0.5pt]
+\textbf{Deliverable 2 (\texttt{chalk} Regeneration Log)}
+
+Record the relevant details of this task in your \texttt{experiment-logbook.md}.
+At a minimum, your logbook must include:
+\begin{itemize}
+    \item the prompts or instructions you used (copy/paste is fine),
+    \item the number of prompting iterations,
+    \item any major prompt changes between iterations,
+    \item any manual edits made to generated code, and why,
+    \item whether success was achieved, and
+    \item what failures remained if you did not fully succeed.
+\end{itemize}
+In your submission, briefly report the outcome of the task, including whether or not it worked, any failed strategies or major obstacles, and any observations or insights that seemed important to eventual success or failure, rather than repeating all raw process details in full.
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+This is my prompt:
+
+\begin{alltt}
+Hello! I am a software engineer and I need to recreate the implementation for chalk Object you 
+will be able to find the Chalk tests in the file tests/chalk.test.js, please create a 
+implementation for that Object that will have the tests running in success, please help me 
+with this task.
+Please create the implementation of this function replace the import in line 21 of the test For
+the implementation you do. You can find the real implementation here: 
+node_modules/chalk/source/index.d.ts
+
+\end{alltt}
+I won't paste the output this time because it is too large. I am surprised by how good Codex is at these tasks:
+
+\begin{itemize}
+    \item The model used is \textit{GPT-5.4}
+    \item It used tools 17 times.
+    \item It achieved 74/74 passing tests.
+    \item The output file was $\sim 400$ lines of code.
+    \item The original version is completely different and contains multiple wrappers, but Codex was able to create an equivalent implementation in only one JavaScript file.
+    \item I didn't have to make corrections.
+\end{itemize}
+\end{tcolorbox}
+
+\subsubsection{Task 3: Manual Source Inspection \textnormal{\textit{(10 minutes)}}}
+
+Pause the generation work and manually inspect the original source code of
+\textbf{\texttt{string-compare}} and \textbf{\texttt{chalk}}.
+
+Your task is \textbf{not} to prove the absence of malicious behavior.
+Your task is to inspect the code as a skeptical engineer and ask whether anything appears
+suspicious.
+
+At a minimum, inspect:
+\begin{itemize}
+    \item the package entry points and exported modules,
+    \item any install or postinstall scripts,
+    \item any use of \texttt{fs}, \texttt{child\_process}, \texttt{http}/\texttt{https}, \texttt{net}, or dynamic code execution mechanisms such as \texttt{eval} or \texttt{Function},
+    \item any minified, obfuscated, or unusually difficult-to-read code,
+    \item any behavior that appears environment-dependent or unrelated to the package's stated purpose.
+\end{itemize}
+
+Consider the following questions during your inspection:
+
+\begin{itemize}
+    \item Are there signs of hidden or unrelated functionality?
+    \item Are there network calls, subprocess invocations, filesystem access, telemetry,
+          or dynamic code execution that seem surprising for the package's stated purpose?
+    \item Is the code small and comprehensible, or opaque and difficult to reason about?
+    \item Would you be comfortable depending on this package without additional review?
+\end{itemize}
+
+
+For each library, state clearly whether you found any behavior that looks like a possible
+backdoor, supply-chain risk, or other red flag. If you found nothing suspicious, say so
+explicitly.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=black,boxrule=0.5pt]
+\textbf{Deliverable 3a (Manual Inspection: \texttt{string-compare})}
+
+\begin{itemize}
+    \item Briefly state what you inspected (\eg entry points, install scripts, sensitive APIs, obfuscated code) and what you found
+    \item Describe any suspicious behavior, unexpected functionality, or red flags found
+    \item If nothing suspicious was found, state this clearly and briefly explain what you checked and why it appeared benign
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+\begin{itemize}
+    \item I reviewed both the real implementation and the regenerated one:
+    \begin{itemize}
+        \item imports
+        \item \texttt{fetch} function calls
+        \item code obfuscation
+    \end{itemize}
+    For \texttt{string-compare}, the original version is implemented in a single file, similar to the regenerated one, so it was easy to compare them. I did not see anything suspicious.
+    
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=yellow!10,colframe=black,boxrule=0.5pt]
+\textbf{Deliverable 3b (Manual Inspection: \texttt{chalk})}
+
+\begin{itemize}
+    \item Briefly state what you inspected (\eg entry points, install scripts, sensitive APIs, obfuscated code) and what you found
+    \item Describe any suspicious behavior, unexpected functionality, or red flags found
+    \item If nothing suspicious was found, state this clearly and briefly explain
+          what you checked and why it appeared benign
+    \item \textbf{2--4 sentences}
+\end{itemize}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+\begin{itemize}
+    \item I reviewed both the real implementation and the regenerated one:
+    \begin{itemize}
+        \item imports
+        \item \texttt{fetch} function calls
+        \item code obfuscation
+    \end{itemize}
+
+    For \texttt{chalk}, the original code is harder to read because it is implemented across many files, which makes manual review more difficult. However, I focused on suspicious imports and function calls, and I did not see anything suspicious. The only imports used by the Chalk library are from \texttt{node:...} modules.
+\end{itemize}
+\end{tcolorbox}
+
+\subsubsection{Task 4: Reflection and Comparison \textnormal{\textit{(10 minutes)}}}
+
+Discuss which of the following felt more useful as an assurance activity:
+regenerating a replacement implementation with LLM assistance, or manually inspecting
+the original dependency source.
+
+Your answer should not be a one-line preference. Explain what each activity was good at,
+what each was bad at, and what evidence each one actually provided.
+
+\begin{tcolorbox}[colback=yellow!10,colframe=black,boxrule=0.5pt]
+\textbf{Deliverable 4 (Reflection and Comparison)}
+
+Address all of the following in prose. \textbf{2--4 sentences per question.}
+
+\begin{enumerate}
+    \item Did the LLM reduce engineering effort, or did it mainly shift effort from
+          implementation into debugging, prompting, and validation?
+    \item Which library was easier to regenerate successfully, and why?
+          Your answer should address both the complexity of the underlying library
+          and whether LLMs are likely to have seen it in training data.
+    \item Did passing tests make you trust the regenerated code? Why or why not?
+    \item Did manual inspection make you trust the original dependency? Why or why not?
+    \item If you were maintaining \texttt{DEMO}, would you rather keep the upstream
+          dependency, replace it with your generated version, or do something else?
+          Justify your answer.
+\end{enumerate}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=blue!10,colframe=blue!70!black,boxrule=0.5pt]
+\begin{enumerate}
+    \item Codex automatically debugged and validated the regenerated code. Based on the output, it kept iterating until all test cases passed, which saved a lot of time.
+    \item \texttt{string-compare} was much easier because it was implemented in a single file. Codex also used fewer tool calls because the exploration space was smaller than for \texttt{chalk}.
+    \item Yes, I trust that the tests are well designed, so they provide useful guarantees for edge cases.
+    \item Not entirely. For \texttt{string-compare}, I think the functionality is simple enough that I could keep my own version, since the implementation is small and I can recreate it from scratch with confidence. For \texttt{chalk}, however, the functionality is not that trivial, so I would trust the upstream version more because other people already use it; I would only feel comfortable with that choice if \texttt{chalk} were not a core functionality in the systems I build.
+\end{enumerate}
+\end{tcolorbox}

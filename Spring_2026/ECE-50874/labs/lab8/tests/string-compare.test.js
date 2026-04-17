@@ -23,8 +23,8 @@
 
 "use strict";
 
-// const compare = require("./string-compare"); // TODO: USE THIS TO POINT TO YOUR FILE (i.e., string-compare.js) TO RUN THE TEST SUITE ON IT
-const { compare } = require("string-compare");
+const compare = require("./string-compare");
+// const { compare } = require("string-compare");
 
 // ---------------------------------------------------------------------------
 // Section 1: Basic return value contract
