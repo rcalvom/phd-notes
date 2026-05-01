@@ -1,2 +1,0 @@
-# Environment variables
-dotenv==0.9.9

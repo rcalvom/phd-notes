@@ -1,0 +1,107 @@
+{
+  "project_name": "mouse_navigation_llm_doe",
+  "project_root": "..",
+  "analysis_goal": "Use the provided mouse navigation dataset to identify a defensible design-of-experiments framing, propose a statistical analysis plan, and summarize the strongest patterns in the data.",
+  "system_prompt": "You are a careful statistician and design-of-experiments consultant. Work only from the supplied data artifacts. If a claim is uncertain, say so explicitly.",
+  "backend": {
+    "provider": "mock",
+    "base_url": "http://127.0.0.1:11434",
+    "timeout_seconds": 600,
+    "response_format": "json"
+  },
+  "data": {
+    "csv_path": "data.csv",
+    "sample_rows": 25,
+    "sample_seed": 51400,
+    "numeric_columns": [
+      "Session",
+      "Trial",
+      "Time-to-Target",
+      "Success",
+      "Path Efficiency",
+      "Shortest Distance",
+      "ToD",
+      "Average Speed",
+      "Total Distance",
+      "AD",
+      "Target Crosses"
+    ],
+    "group_summaries": [
+      {
+        "name": "summary_by_stim_tuning",
+        "keys": ["Stim Paradigm", "Tuning Width"],
+        "metrics": [
+          "Success",
+          "Time-to-Target",
+          "Path Efficiency",
+          "Average Speed",
+          "Total Distance",
+          "AD",
+          "Target Crosses"
+        ]
+      },
+      {
+        "name": "summary_by_mouse_stim_tuning",
+        "keys": ["Mouse", "Stim Paradigm", "Tuning Width"],
+        "metrics": [
+          "Success",
+          "Time-to-Target",
+          "Path Efficiency",
+          "Average Speed",
+          "Total Distance",
+          "AD",
+          "Target Crosses"
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "dir": "artifacts/data"
+  },
+  "data_views": {
+    "summary_only": {
+      "artifacts": ["overview_markdown"]
+    },
+    "grouped_focus": {
+      "artifacts": ["overview_markdown", "summary_by_stim_tuning"]
+    },
+    "rich_context": {
+      "artifacts": ["overview_markdown", "summary_by_stim_tuning", "summary_by_mouse_stim_tuning", "sample_rows"]
+    }
+  },
+  "design": {
+    "replications": 3,
+    "random_seed": 51400,
+    "randomize": true,
+    "factors": [
+      {
+        "name": "model",
+        "levels": [
+          "deepseek-r1:8b",
+          "llama3.1:8b"
+        ]
+      },
+      {
+        "name": "temperature",
+        "levels": [0.1, 0.6]
+      },
+      {
+        "name": "prompt_template",
+        "levels": [
+          "prompts/design_focus.md",
+          "prompts/statistical_focus.md"
+        ]
+      },
+      {
+        "name": "data_view",
+        "levels": [
+          "summary_only",
+          "rich_context"
+        ]
+      }
+    ]
+  },
+  "outputs": {
+    "dir": "outputs"
+  }
+}
