@@ -46,7 +46,7 @@ python3 doe.py run --config configs/full_factorial.json --clean
 ## What to edit before running with Ollama
 
 - In `configs/full_factorial.json`, verify the actual tags for the models installed on your machine.
-- If `kimi-k2:latest` does not match your local model name, replace it with the correct one.
+- If your cluster uses different model tags than `qwen3.6:35b`, `llama3:70b`, or `deepseek-r1:70b`, replace them with the correct ones.
 - Adjust the number of factor levels if 405 runs are too many for an initial pass.
 - Replications are configured to reuse the same treatment combinations three times.
 

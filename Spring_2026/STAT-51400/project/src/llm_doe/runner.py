@@ -360,23 +360,8 @@ def mock_response(run: dict[str, Any], prompt_text: str) -> dict[str, Any]:
     """Generate deterministic synthetic responses for offline testing and smoke runs."""
     seed = 1000 + int(run["run_id"])
     rng = random.Random(seed)
-    response_text = json.dumps(
-        {
-            "research_question": "How do stimulation paradigm and tuning width relate to navigation success and speed?",
-            "recommended_design": "Treat model settings as factors in a crossed factorial screening study.",
-            "experimental_units": "One LLM analysis run on the prepared data view.",
-            "response_variables": ["wall_clock_seconds", "input_token_count", "output_token_count", "response_quality_score"],
-            "main_patterns": [
-                "Success appears to vary strongly across stimulation paradigms.",
-                "Wide vs narrow tuning may interact with paradigm.",
-            ],
-            "limitations": [
-                "The raw CSV is observational with respect to the LLM comparisons.",
-                "Reasoning effort is implemented as a prompt policy, not a native standardized control.",
-            ],
-        },
-        ensure_ascii=False,
-    )
+    response_payload = build_mock_payload(prompt_text)
+    response_text = json.dumps(response_payload, ensure_ascii=False)
 
     prompt_tokens = max(50, len(prompt_text) // 4)
     eval_tokens = rng.randint(180, 340)
@@ -393,6 +378,72 @@ def mock_response(run: dict[str, Any], prompt_text: str) -> dict[str, Any]:
         "prompt_eval_duration": rng.randint(200_000_000, 600_000_000),
         "eval_duration": rng.randint(1_000_000_000, 4_000_000_000),
     }
+
+
+def build_mock_payload(prompt_text: str) -> dict[str, Any]:
+    """Create a schema-aligned mock response body from the keys requested in a prompt."""
+    expected_keys = extract_expected_json_keys(prompt_text)
+    shared_values: dict[str, Any] = {
+        "research_question": "How does navigation performance differ across the five selected stimulation paradigms?",
+        "stim_paradigms_compared": [
+            "Combined",
+            "ICMS Only",
+            "Dim Visual Only",
+            "Bright Visual Only",
+            "Sham",
+        ],
+        "response_variables": [
+            "Time-to-Target",
+            "Success",
+            "Path Efficiency",
+            "Average Speed",
+            "AD",
+        ],
+        "descriptive_findings": [
+            "Sham appears to have the lowest mean success and the highest mean time-to-target.",
+            "Combined and Bright Visual Only appear stronger than ICMS Only and Dim Visual Only on several summary metrics.",
+        ],
+        "strongest_group_differences": [
+            "Sham differs substantially from Combined on success and time-to-target.",
+            "Combined and Bright Visual Only appear relatively similar on path efficiency and average speed.",
+        ],
+        "practical_interpretation": "The grouped summaries suggest that stimulation paradigm is associated with meaningful differences in navigation performance.",
+        "limitations": [
+            "These conclusions come from summary artifacts rather than raw-trial modeling in the mock backend.",
+            "Formal inference still depends on model assumptions and appropriate treatment of each response variable.",
+        ],
+        "recommended_next_analysis": "Fit per-response stimulation-paradigm comparisons and inspect diagnostics before final interpretation.",
+        "anova_plan": [
+            "Use stimulation paradigm as the primary grouping factor for each response variable.",
+            "Check whether each response is suitable for classical ANOVA before relying on omnibus tests.",
+        ],
+        "assumptions_and_diagnostics": [
+            "Inspect residual normality and variance homogeneity for continuous outcomes.",
+            "Treat Success as a binary response that may need a generalized model rather than plain ANOVA.",
+        ],
+        "posthoc_plan": [
+            "Use pairwise post-hoc comparisons only when the omnibus comparison is informative.",
+            "Prioritize contrasts involving Sham versus the active stimulation paradigms.",
+        ],
+        "expected_findings": [
+            "Sham is likely to perform worse than the active stimulation paradigms.",
+            "Combined may rank among the strongest paradigms on success and navigation efficiency.",
+        ],
+        "multiple_comparison_strategy": "Use a multiple-comparison correction such as Tukey-style familywise control or a false-discovery-rate approach when many pairwise contrasts are reported.",
+        "predictive_model_recommendation": "Because stimulation paradigm is categorical, prefer a multiclass classification model rather than ordinary linear regression if raw-trial prediction is attempted.",
+        "recommended_design": "Treat each LLM run as an experimental unit while comparing how prompts and runtime settings affect the analysis of stimulation paradigm.",
+        "experimental_units": "One LLM analysis run over the filtered stimulation-paradigm data view.",
+        "main_patterns": [
+            "Sham looks substantially weaker than the active stimulation paradigms.",
+            "Combined and Bright Visual Only appear comparatively strong on several performance summaries.",
+        ],
+    }
+
+    payload: dict[str, Any] = {}
+    for key in expected_keys:
+        payload[key] = shared_values.get(key, f"Mock value for {key}.")
+
+    return payload
 
 
 def mean_numeric(records: list[dict[str, Any]], field: str) -> float | None:

@@ -111,6 +111,21 @@ def infer_numeric_columns(csv_path: Path, sample_limit: int = 250) -> list[str]:
     return [field for field, is_numeric in candidates.items() if is_numeric]
 
 
+def row_matches_filters(row: dict[str, str], row_filters: list[dict[str, Any]]) -> bool:
+    """Return whether a CSV row satisfies all configured include/exclude filter rules."""
+    for row_filter in row_filters:
+        value = row.get(row_filter["column"], "")
+        include = row_filter.get("include")
+        exclude = row_filter.get("exclude")
+
+        if include is not None and value not in include:
+            return False
+        if exclude is not None and value in exclude:
+            return False
+
+    return True
+
+
 def build_data_artifacts(config: dict[str, Any]) -> dict[str, str]:
     """Create dataset profile, overview, samples, and grouped summary artifacts from the source CSV."""
     data_config = config["data"]
@@ -121,6 +136,8 @@ def build_data_artifacts(config: dict[str, Any]) -> dict[str, str]:
     if not numeric_columns:
         numeric_columns = infer_numeric_columns(csv_path)
 
+    columns_to_keep = data_config.get("columns_to_keep")
+    row_filters = data_config.get("row_filters", [])
     sample_rows = int(data_config.get("sample_rows", 25))
     sample_seed = int(data_config.get("sample_seed", 51400))
     group_summaries = data_config.get("group_summaries", [])
@@ -131,6 +148,7 @@ def build_data_artifacts(config: dict[str, Any]) -> dict[str, str]:
     groups: dict[str, dict[tuple[str, ...], GroupAccumulator]] = {}
     sample: list[dict[str, str]] = []
     sample_rng = random.Random(sample_seed)
+    source_row_count = 0
     row_count = 0
     fieldnames: list[str] = []
 
@@ -139,10 +157,22 @@ def build_data_artifacts(config: dict[str, Any]) -> dict[str, str]:
 
     with csv_path.open("r", encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle)
-        fieldnames = reader.fieldnames or []
+        source_fieldnames = reader.fieldnames or []
+        if columns_to_keep:
+            missing_columns = [column for column in columns_to_keep if column not in source_fieldnames]
+            if missing_columns:
+                raise KeyError(f"Configured columns_to_keep are missing from the CSV: {missing_columns}")
+            fieldnames = columns_to_keep
+        else:
+            fieldnames = source_fieldnames
         categorical_columns = [column for column in fieldnames if column not in numeric_columns]
 
-        for row in reader:
+        for raw_row in reader:
+            source_row_count += 1
+            if not row_matches_filters(raw_row, row_filters):
+                continue
+
+            row = {column: raw_row.get(column, "") for column in fieldnames}
             row_count += 1
 
             if len(sample) < sample_rows:
@@ -176,9 +206,11 @@ def build_data_artifacts(config: dict[str, Any]) -> dict[str, str]:
 
     profile = {
         "dataset_path": str(csv_path),
+        "source_row_count": source_row_count,
         "row_count": row_count,
         "column_count": len(fieldnames),
         "columns": fieldnames,
+        "row_filters": row_filters,
         "missing_counts": dict(sorted(missing_counts.items())),
         "numeric_summary": {column: stats.summary() for column, stats in numeric_stats.items()},
         "categorical_summary": {
@@ -227,9 +259,13 @@ def build_markdown_overview(profile: dict[str, Any]) -> str:
     lines: list[str] = []
     lines.append("# Dataset overview")
     lines.append("")
-    lines.append(f"- Rows: {profile['row_count']}")
+    if "source_row_count" in profile:
+        lines.append(f"- Source rows: {profile['source_row_count']}")
+    lines.append(f"- Rows after filters: {profile['row_count']}")
     lines.append(f"- Columns: {profile['column_count']}")
     lines.append(f"- Column names: {', '.join(profile['columns'])}")
+    if profile.get("row_filters"):
+        lines.append(f"- Row filters: {profile['row_filters']}")
     lines.append("")
     lines.append("## Numeric summary")
     lines.append("")

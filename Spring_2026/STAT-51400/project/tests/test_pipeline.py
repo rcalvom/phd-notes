@@ -60,6 +60,12 @@ class PipelineTests(unittest.TestCase):
                 "data": {
                     "csv_path": "data.csv",
                     "sample_rows": 2,
+                    "row_filters": [
+                        {
+                            "column": "Stim Paradigm",
+                            "include": ["Combined"]
+                        }
+                    ],
                     "numeric_columns": [
                         "Session",
                         "Trial",
@@ -110,6 +116,8 @@ class PipelineTests(unittest.TestCase):
             loaded = load_config(config_path)
             summary = run_experiment(loaded)
             self.assertEqual(summary["executed_runs"], 2)
+            dataset_profile = json.loads((tmp / "artifacts" / "data" / "dataset_profile.json").read_text(encoding="utf-8"))
+            self.assertEqual(dataset_profile["row_count"], 2)
             aggregate = summarize_results(loaded)
             self.assertTrue(Path(aggregate["summary_csv"]).exists())
 

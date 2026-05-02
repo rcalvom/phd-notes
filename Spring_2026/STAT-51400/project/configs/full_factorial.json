@@ -1,8 +1,8 @@
 {
   "project_name": "mouse_navigation_llm_doe",
   "project_root": "..",
-  "analysis_goal": "Use the provided mouse navigation dataset to identify a defensible design-of-experiments framing, propose a statistical analysis plan, and summarize the strongest patterns in the data.",
-  "system_prompt": "You are a careful statistician and design-of-experiments consultant. Work only from the supplied data artifacts. If a claim is uncertain, say so explicitly.",
+  "analysis_goal": "Analyze mouse navigation performance by stimulation paradigm for the five paradigms Combined, ICMS Only, Dim Visual Only, Bright Visual Only, and Sham, using only Time-to-Target, Success, Path Efficiency, Average Speed, and AD (angular dispersion).",
+  "system_prompt": "You are a careful statistician and experimental analysis assistant. Work only from the supplied data artifacts and only from the requested stimulation paradigms and performance variables. If a claim is uncertain, say so explicitly.",
   "backend": {
     "provider": "ollama",
     "base_url": "http://127.0.0.1:11434",
@@ -13,44 +13,55 @@
     "csv_path": "data.csv",
     "sample_rows": 40,
     "sample_seed": 51400,
-    "numeric_columns": [
-      "Session",
-      "Trial",
+    "columns_to_keep": [
+      "Mouse",
+      "Stim Paradigm",
       "Time-to-Target",
       "Success",
       "Path Efficiency",
-      "Shortest Distance",
-      "ToD",
       "Average Speed",
-      "Total Distance",
-      "AD",
-      "Target Crosses"
+      "AD"
+    ],
+    "row_filters": [
+      {
+        "column": "Stim Paradigm",
+        "include": [
+          "Combined",
+          "ICMS Only",
+          "Dim Visual Only",
+          "Bright Visual Only",
+          "Sham"
+        ]
+      }
+    ],
+    "numeric_columns": [
+      "Time-to-Target",
+      "Success",
+      "Path Efficiency",
+      "Average Speed",
+      "AD"
     ],
     "group_summaries": [
       {
-        "name": "summary_by_stim_tuning",
-        "keys": ["Stim Paradigm", "Tuning Width"],
+        "name": "summary_by_stim_paradigm",
+        "keys": ["Stim Paradigm"],
         "metrics": [
           "Success",
           "Time-to-Target",
           "Path Efficiency",
           "Average Speed",
-          "Total Distance",
-          "AD",
-          "Target Crosses"
+          "AD"
         ]
       },
       {
-        "name": "summary_by_mouse_stim_tuning",
-        "keys": ["Mouse", "Stim Paradigm", "Tuning Width"],
+        "name": "summary_by_mouse_and_stim_paradigm",
+        "keys": ["Mouse", "Stim Paradigm"],
         "metrics": [
           "Success",
           "Time-to-Target",
           "Path Efficiency",
           "Average Speed",
-          "Total Distance",
-          "AD",
-          "Target Crosses"
+          "AD"
         ]
       }
     ]
@@ -62,11 +73,11 @@
     "summary_only": {
       "artifacts": ["overview_markdown"]
     },
-    "grouped_focus": {
-      "artifacts": ["overview_markdown", "summary_by_stim_tuning"]
+    "stim_summary": {
+      "artifacts": ["overview_markdown", "summary_by_stim_paradigm"]
     },
-    "rich_context": {
-      "artifacts": ["overview_markdown", "summary_by_stim_tuning", "summary_by_mouse_stim_tuning", "sample_rows"]
+    "stim_and_mouse_summary": {
+      "artifacts": ["overview_markdown", "summary_by_stim_paradigm", "summary_by_mouse_and_stim_paradigm", "sample_rows"]
     }
   },
   "design": {
@@ -78,16 +89,16 @@
         "name": "model",
         "levels": [
           {
-            "label": "kimi",
-            "model": "kimi-k2:latest"
+            "label": "qwen",
+            "model": "qwen3.6:35b"
           },
           {
             "label": "deepseek",
-            "model": "deepseek-r1:8b"
+            "model": "deepseek-r1:70b"
           },
           {
             "label": "llama",
-            "model": "llama3.1:8b"
+            "model": "llama3:70b"
           }
         ]
       },
@@ -98,17 +109,17 @@
       {
         "name": "prompt_template",
         "levels": [
-          "prompts/design_focus.md",
-          "prompts/statistical_focus.md",
-          "prompts/reviewer_focus.md"
+          "prompts/stim_paradigm_basic.md",
+          "prompts/stim_paradigm_anova.md",
+          "prompts/stim_paradigm_predictive.md"
         ]
       },
       {
         "name": "data_view",
         "levels": [
           "summary_only",
-          "grouped_focus",
-          "rich_context"
+          "stim_summary",
+          "stim_and_mouse_summary"
         ]
       }
     ]
