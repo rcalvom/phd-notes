@@ -1,3 +1,0 @@
-# Runtime requirements for this project.
-# The current pipeline uses only the Python standard library.
-# Python 3.11+ is required.

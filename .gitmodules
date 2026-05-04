@@ -14,3 +14,6 @@
 [submodule "Fall_2025/ECE-60852/assignments/assignment3/codeql"]
 	path = Fall_2025/ECE-60852/assignments/assignment3/codeql
 	url = https://github.com/github/codeql.git
+[submodule "Spring_2026/STAT-51400/project"]
+	path = Spring_2026/STAT-51400/project
+	url = https://github.com/rcalvom/STAT-51400-project
