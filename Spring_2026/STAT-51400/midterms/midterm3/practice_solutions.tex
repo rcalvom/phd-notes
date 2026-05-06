@@ -1,0 +1,471 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\setlist[enumerate]{itemsep=0.4em}
+\setlist[itemize]{itemsep=0.25em}
+\renewcommand{\arraystretch}{1.18}
+
+\title{STAT 514 Practice Final Solutions}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+
+\noindent Source: \texttt{midterms/midterm3/practice.pdf}. These notes emphasize reusable formulas and exam-ready calculations.
+
+\section*{Problem 1}
+
+\begin{enumerate}[label=(\alph*)]
+\item A \(2^{8-3}_{IV}\) design has
+\[
+2^{8-3}=32
+\]
+runs and \(8\) two-level factors.
+
+\item In a resolution IV design, a two-factor interaction is not aliased with a main effect, but it may be aliased with another two-factor interaction.
+
+\item A \(2^{9-5}_{III}\) design has \(2^{9-5}=16\) runs, so it can estimate
+\[
+16-1=15
+\]
+factorial effects besides the intercept. Since \(p=5\), each effect is aliased with
+\[
+2^p-1=2^5-1=31
+\]
+other factorial effects.
+
+\item The fundamental principles for factorial effects are sparsity, hierarchy, and heredity.
+
+\item A CCD using a \(2^{5-1}_V\) factorial portion and \(3\) center points has
+\[
+n_F+2k+n_C=2^{5-1}+2(5)+3=16+10+3=29
+\]
+runs.
+
+\item A \(3^2\) full factorial design has \(3^2=9\) runs and \(2\) factors.
+
+\item A Latin hypercube design with \(n\) runs in \(k\) factors has \(1\) point in each of the \(n\) equally sized intervals of every one-dimensional marginal, so each level is sampled \(1\) time per factor.
+
+\item A maximin LHD maximizes the minimum pairwise distance. A minimax design minimizes the maximum distance from any candidate input to its nearest design point.
+\end{enumerate}
+
+\section*{Problem 2}
+
+General rule:
+\[
+df_E=N-p,
+\]
+where \(p\) includes the intercept and all fitted model parameters.
+
+\begin{enumerate}[label=(\alph*)]
+\item CRD with three treatments and \(7,8,9\) replicates:
+\[
+N=24,\qquad df_E=N-a=24-3=21.
+\]
+
+\item Paired comparison with \(15\) pairs:
+\[
+df_E=n_{\text{pairs}}-1=15-1=14.
+\]
+
+\item Full \(2^4\) factorial with \(3\) replicates and all effects:
+\[
+N=2^4(3)=48,\qquad p=2^4=16,\qquad df_E=48-16=32.
+\]
+Equivalently, \(df_E=2^k(n-1)=2^4(2)=32\).
+
+\item Unreplicated \(2^{8-2}\) design:
+\[
+N=2^6=64.
+\]
+The model has
+\[
+p=1+8+\binom{8}{2}=1+8+28=37.
+\]
+Thus
+\[
+df_E=64-37=27.
+\]
+
+\item CCD using \(2^{3-1}\) factorial runs and \(5\) center runs:
+\[
+N=2^{3-1}+2(3)+5=4+6+5=15.
+\]
+A standard second-order model for \(k=3\) has
+\[
+p=1+k+k+\binom{k}{2}=1+3+3+3=10.
+\]
+Thus
+\[
+df_E=15-10=5.
+\]
+
+\item Full \(3^2\) factorial with two replicates:
+\[
+N=3^2(2)=18,\qquad p=9,
+\]
+so
+\[
+df_E=18-9=9.
+\]
+\end{enumerate}
+
+\section*{Problem 3}
+
+\begin{enumerate}[label=(\alph*)]
+\item Use a \(16\)-run \(2^{7-3}\) fractional factorial design, preferably maximum resolution IV. This is appropriate for screening seven two-level factors under a 16-run limit. There is no stated blocking factor. Sample size:
+\[
+N=16.
+\]
+
+\item Use a central composite design for the three quantitative factors because a second-order model is needed for curvature, interactions, prediction, and optimization. No stated blocking factor. General sample size:
+\[
+N=2^3+2(3)+n_C=14+n_C.
+\]
+With five center runs:
+\[
+N=19.
+\]
+
+\item Use a space-filling design, preferably a maximin Latin hypercube design, for \(12\) simulator inputs. The simulator is deterministic, so replication is wasteful. No blocking factor. Since the scientists want 100 uniformly spaced levels per parameter:
+\[
+N=100.
+\]
+
+\item Use a completely randomized design. The aquaria are essentially homogeneous and there is no obvious nuisance factor. No blocking factor. Balanced allocation gives:
+\[
+N=40,\qquad 10\ \text{aquaria per diet}.
+\]
+
+\item Use a randomized complete block design with production day as the block. Each of the three treatment levels is run within each of five days:
+\[
+N=3(5)=15.
+\]
+\end{enumerate}
+
+\section*{Problem 4}
+
+\subsection*{(a)}
+Let \(i=1,2,3\) index cutting speed, \(j=1,2,3\) index coolant type, and \(k=1,\ldots,4\) index replicates. The two-factor ANOVA model with interaction is
+\[
+y_{ijk}=\mu+\alpha_i+\beta_j+(\alpha\beta)_{ij}+\varepsilon_{ijk},
+\qquad
+\varepsilon_{ijk}\stackrel{iid}{\sim}N(0,\sigma^2).
+\]
+The constraints are
+\[
+\sum_{i=1}^3\alpha_i=0,\qquad
+\sum_{j=1}^3\beta_j=0,
+\]
+\[
+\sum_{i=1}^3(\alpha\beta)_{ij}=0\quad\text{for each }j,\qquad
+\sum_{j=1}^3(\alpha\beta)_{ij}=0\quad\text{for each }i.
+\]
+
+\subsection*{(b)}
+There are \(N=3\cdot3\cdot4=36\) observations. Degrees of freedom are
+\[
+df_A=2,\quad df_B=2,\quad df_{AB}=4,\quad df_E=3\cdot3(4-1)=27,\quad df_T=35.
+\]
+Given \(R^2=0.94\) and \(SSE=18\),
+\[
+0.94=1-\frac{18}{SST}\quad\Rightarrow\quad SST=\frac{18}{0.06}=300.
+\]
+Thus
+\[
+MSE=\frac{18}{27}=\frac{2}{3}.
+\]
+Cutting speed has \(F=90\):
+\[
+MS_A=90\left(\frac{2}{3}\right)=60,\qquad SS_A=2(60)=120.
+\]
+Coolant type has \(SS_B=90\):
+\[
+MS_B=45,\qquad F_B=\frac{45}{2/3}=67.5.
+\]
+Interaction:
+\[
+SS_{AB}=300-120-90-18=72,\quad
+MS_{AB}=\frac{72}{4}=18,\quad
+F_{AB}=\frac{18}{2/3}=27.
+\]
+
+\[
+\begin{array}{lrrrr}
+\toprule
+\text{Source} & df & SS & MS & F\\
+\midrule
+\text{Cutting speed} & 2 & 120 & 60 & 90\\
+\text{Coolant type} & 2 & 90 & 45 & 67.5\\
+\text{Interaction} & 4 & 72 & 18 & 27\\
+\text{Error} & 27 & 18 & 2/3 & \\
+\text{Total} & 35 & 300 & & \\
+\bottomrule
+\end{array}
+\]
+
+\section*{Problem 5}
+
+For a one-replicate \(2^k\) factorial, the effect of term \(T\) is
+\[
+\widehat{\text{effect}}_T=\bar y_{T+}-\bar y_{T-}
+=\frac{1}{2^{k-1}}\sum_{\text{runs}}s_Ty,
+\]
+where \(s_T\) is the product of coded signs for the term.
+
+\begin{enumerate}[label=(\alph*)]
+\item Main effect of \(A\):
+\[
+\bar y_{A+}=\frac{72+85+79+80}{4}=79,\qquad
+\bar y_{A-}=\frac{98+87+99+87}{4}=92.75.
+\]
+\[
+\hat A=79-92.75=-13.75.
+\]
+
+\item For \(AB\), \(s_{AB}=x_Ax_B\):
+\[
+\bar y_{AB+}=\frac{98+85+99+80}{4}=90.5,\qquad
+\bar y_{AB-}=\frac{72+87+79+87}{4}=81.25.
+\]
+\[
+\widehat{AB}=90.5-81.25=9.25.
+\]
+
+\item Main effect plot for \(A\): plot \((-1,92.75)\) and \((+1,79.00)\). The line decreases, so high \(A\) lowers roughness.
+
+For the \(AB\) interaction plot:
+\[
+\begin{array}{crr}
+\toprule
+B & \bar y(A=-1) & \bar y(A=+1)\\
+\midrule
+-1 & (98+99)/2=98.5 & (72+79)/2=75.5\\
++1 & (87+87)/2=87.0 & (85+80)/2=82.5\\
+\bottomrule
+\end{array}
+\]
+The lines are not parallel; the effect of \(A\) is stronger when \(B=-1\).
+
+\item Reduced model:
+\[
+y=\beta_0+\beta_Ax_A+\beta_{AB}x_Ax_B+\varepsilon.
+\]
+For an orthogonal two-level factorial:
+\[
+\hat\beta_0=\bar y,\qquad \hat\beta_T=\frac{\widehat{\text{effect}}_T}{2}.
+\]
+Thus
+\[
+\hat\beta_0=\frac{98+72+87+85+99+79+87+80}{8}=85.875,
+\]
+\[
+\hat\beta_A=-13.75/2=-6.875,\qquad
+\hat\beta_{AB}=9.25/2=4.625.
+\]
+Fitted model:
+\[
+\hat y=85.875-6.875x_A+4.625x_Ax_B.
+\]
+
+\item Predictions:
+\[
+\begin{array}{rrrr}
+\toprule
+A & B & x_Ax_B & \hat y\\
+\midrule
+-1 & -1 & +1 & 97.375\\
++1 & -1 & -1 & 74.375\\
+-1 & +1 & -1 & 88.125\\
++1 & +1 & +1 & 83.625\\
+\bottomrule
+\end{array}
+\]
+The minimum predicted roughness is at \(A=+1,B=-1\), with \(\hat y=74.375\).
+\end{enumerate}
+
+\section*{Problem 6}
+
+\begin{enumerate}[label=(\alph*)]
+\item The column \(D\) equals \(ABC\), so
+\[
+D=ABC,\qquad I=ABCD.
+\]
+
+\item The column \(E\) equals \(-AC\), so
+\[
+E=-AC,\qquad I=-ACE.
+\]
+
+\item The independent words are \(I=ABCD\) and \(I=-ACE\). Multiplying them gives
+\[
+(ABCD)(-ACE)=-BDE.
+\]
+Therefore the complete defining relation is
+\[
+I=ABCD=-ACE=-BDE.
+\]
+
+\item The shortest nonidentity words are \(ACE\) and \(BDE\), both of length 3. The design has resolution III.
+
+\item Reverse the signs of column \(B\). If the reversed column is still called \(B\), then
+\[
+D=-ABC,\qquad E=-AC.
+\]
+Thus
+\[
+I=-ABCD,\qquad I=-ACE.
+\]
+Multiplying gives \(BDE\), so the complete defining relation is
+\[
+I=-ABCD=-ACE=BDE.
+\]
+\end{enumerate}
+
+\section*{Problem 7}
+
+\begin{enumerate}[label=(\alph*)]
+\item
+\[
+\bar y_{A+}=\frac{32+45}{2}=38.5,\qquad
+\bar y_{A-}=\frac{54+47}{2}=50.5.
+\]
+\[
+\hat A=38.5-50.5=-12.
+\]
+
+\item
+\[
+\bar y_{AB+}=\frac{54+45}{2}=49.5,\qquad
+\bar y_{AB-}=\frac{47+32}{2}=39.5.
+\]
+\[
+\widehat{AB}=49.5-39.5=10.
+\]
+
+\item Estimate pure error from the center points \(40,38,42\):
+\[
+\bar y_C=40,
+\]
+\[
+\hat\sigma^2=MSE_{\text{pure error}}
+=\frac{(40-40)^2+(38-40)^2+(42-40)^2}{3-1}
+=4.
+\]
+Degrees of freedom:
+\[
+df_E=3-1=2.
+\]
+
+\item For a one-replicate \(2^2\) factorial,
+\[
+SE(\widehat{\text{effect}})=\sqrt{MSE}.
+\]
+Thus
+\[
+SE(\widehat{AB})=\sqrt{4}=2,\qquad
+t_0=\frac{10}{2}=5.
+\]
+With \(df=2\), \(t_{0.025,2}=4.303\). Since \(|5|>4.303\), the \(AB\) interaction is significant at the 5\% level.
+
+\item Curvature compares center and factorial means:
+\[
+\bar y_F=\frac{54+47+32+45}{4}=44.5,\qquad
+\bar y_C=40.
+\]
+\[
+\hat C=\bar y_C-\bar y_F=-4.5.
+\]
+Standard error:
+\[
+SE(\hat C)=\sqrt{MSE\left(\frac{1}{n_C}+\frac{1}{n_F}\right)}
+=\sqrt{4\left(\frac{1}{3}+\frac{1}{4}\right)}
+=\sqrt{\frac{7}{3}}=1.528.
+\]
+Test statistic:
+\[
+t_0=\frac{-4.5}{1.528}=-2.95.
+\]
+Since \(|-2.95|<t_{0.025,2}=4.303\), curvature is not significant at the 5\% level.
+
+Equivalent:
+\[
+SS_{\text{curv}}=\frac{n_Fn_C}{n_F+n_C}(\bar y_F-\bar y_C)^2
+=\frac{4\cdot3}{7}(4.5)^2=34.714,
+\]
+\[
+F_{\text{curv}}=\frac{34.714}{4}=8.679=t_0^2.
+\]
+\end{enumerate}
+
+\section*{Problem 8}
+
+The fitted model is
+\[
+y=8+4x_1-2x_2-2x_1^2-x_2^2+\varepsilon.
+\]
+
+\begin{enumerate}[label=(\alph*)]
+\item A circumscribed CCD with \(k=2\), \(\alpha=\sqrt{2}\), and three center points has:
+\[
+\text{factorial points: }(-1,-1),(1,-1),(-1,1),(1,1),
+\]
+\[
+\text{axial points: }(\sqrt2,0),(-\sqrt2,0),(0,\sqrt2),(0,-\sqrt2),
+\]
+\[
+\text{center points: }(0,0),(0,0),(0,0).
+\]
+Total:
+\[
+N=4+4+3=11.
+\]
+
+\item In
+\[
+y=\beta_0+x'b+x'Bx+\varepsilon,\qquad x=(x_1,x_2)',
+\]
+we have
+\[
+\beta_0=8,\qquad
+b=\begin{pmatrix}4\\-2\end{pmatrix},
+\]
+and, because there is no interaction term,
+\[
+B=\begin{pmatrix}-2&0\\0&-1\end{pmatrix}.
+\]
+
+\item The stationary point solves
+\[
+b+2Bx_s=0,\qquad x_s=-\frac12B^{-1}b.
+\]
+Since
+\[
+B^{-1}=\begin{pmatrix}-1/2&0\\0&-1\end{pmatrix},
+\]
+\[
+B^{-1}b=\begin{pmatrix}-2\\2\end{pmatrix},
+\qquad
+x_s=-\frac12\begin{pmatrix}-2\\2\end{pmatrix}
+=\begin{pmatrix}1\\-1\end{pmatrix}.
+\]
+The stationary point is \((x_1,x_2)=(1,-1)\).
+
+\item The eigenvalues of the diagonal matrix \(B\) are
+\[
+\lambda_1=-2,\qquad \lambda_2=-1.
+\]
+Both are negative, so \(B\) is negative definite and the stationary point is a maximum. The predicted maximum response is
+\[
+\hat y(1,-1)=8+4(1)-2(-1)-2(1)^2-(-1)^2=11.
+\]
+\end{enumerate}
+
+\end{document}

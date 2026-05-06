@@ -1,0 +1,6 @@
+# Core scientific stack for STAT 514 exam scripts
+numpy
+scipy
+pandas
+statsmodels
+matplotlib
