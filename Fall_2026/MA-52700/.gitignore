@@ -2,4 +2,4 @@
 book/*
 
 # Xournal++ Autosaves
-homeworks/*.autosave.xopp
+homeworks/**/*.autosave.xopp
