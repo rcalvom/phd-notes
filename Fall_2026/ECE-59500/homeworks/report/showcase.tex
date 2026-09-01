@@ -1,0 +1,30 @@
+\DocumentMetadata{
+  lang=en-US,
+  pdfstandard=ua-2,
+  testphase={phase-III,title,table}
+}
+\documentclass[letterpaper,11pt]{article}
+
+\input{fragments/showcase/_metadata}
+\usepackage{theme/ricardo-homework}
+
+\hypersetup{
+  pdftitle={Homework Template Showcase},
+  pdfauthor={homework-template},
+  pdfsubject={Component catalogue for homework-template},
+  pdfkeywords={LaTeX, homework, template, showcase}
+}
+
+\begin{document}
+
+\makehomeworktitle
+
+% Every .tex in the folder, in name order -- adding a section to this
+% catalogue is creating a file. `_'-prefixed files are skipped, which is why
+% the metadata above is _metadata.tex and is not pulled in twice.
+\DocFolder{fragments/showcase}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

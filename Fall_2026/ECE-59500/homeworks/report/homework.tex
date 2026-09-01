@@ -1,0 +1,28 @@
+\DocumentMetadata{
+  lang=en-US,
+  pdfstandard=ua-2,
+  testphase={phase-III,title,table}
+}
+\documentclass[letterpaper,11pt]{article}
+
+\input{fragments/metadata}
+\usepackage{theme/ricardo-homework}
+
+\hypersetup{
+  pdftitle={\HomeworkTitle: \HomeworkSubtitle},
+  pdfauthor={\StudentName},
+  pdfsubject={\CourseCode\space coursework},
+  pdfkeywords={homework, \CourseCode, \CourseName}
+}
+
+\begin{document}
+
+\makehomeworktitle
+
+% Every .tex in the folder, in name order. Adding one is creating a file.
+\DocFolder{fragments/problems}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

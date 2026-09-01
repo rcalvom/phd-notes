@@ -1,0 +1,83 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{theme/ricardo-layouts}[2026/08/31 Homework layouts]
+
+\RequirePackage{xparse}
+
+% Centred, in the manner of a journal article: the title carries the weight,
+% everything else lines up under it and gets quieter as it descends.
+%
+% The order is deliberate. Title, then what the assignment is, then who is
+% handing it in, then the course, then the date -- a reader scanning a stack
+% of these finds the name and the number in the same place every time.
+%
+% Instructor and collaborators sit last and smallest. They are required on a
+% homework and read by nobody until they matter, which is exactly what a
+% footnote-sized line at the bottom of a header is for.
+% The share of the text width the rule under the title block spans.
+\providecommand{\rzheadrule}{0.40}
+
+\NewDocumentCommand{\makehomeworktitle}{}{%
+  \thispagestyle{homeworkfirst}%
+  \begin{center}
+    {\LARGE\bfseries\color{rzaccent}\HomeworkTitle\par}
+    \ifstrempty{\HomeworkSubtitle}{}{%
+      \vspace{0.35em}%
+      {\large\HomeworkSubtitle\par}%
+    }
+    \vspace{0.9em}
+
+    {\StudentName
+     \ifstrempty{\StudentId}{}{\rzheadsep\StudentId}\par}
+    \vspace{0.15em}
+    {\CourseCode\ifstrempty{\CourseName}{}{\rzheadsep\CourseName}\par}
+    \vspace{0.15em}
+    {\SubmissionDate\par}
+
+    \ifboolexpr{ test {\ifstrempty{\InstructorName}}
+                 and test {\ifstrempty{\Collaborators}} }{}{%
+      \vspace{0.45em}
+      {\footnotesize\color{rzmuted}
+       \ifstrempty{\InstructorName}{}{\InstructorName}%
+       \ifboolexpr{ test {\ifstrempty{\InstructorName}}
+                    or test {\ifstrempty{\Collaborators}} }{}{\rzheadsep}%
+       \ifstrempty{\Collaborators}{}{Collaborators: \Collaborators}\par}%
+    }
+
+    % Long enough to read as a divider between the header and the body, short
+    % enough not to become a line across the page -- which is what the centred
+    % arrangement is avoiding. \rzheadrule is the one number to change if it
+    % wants to be longer or shorter still.
+    \vspace{0.7em}
+    {\color{rzaccent}\rule{\rzheadrule\textwidth}{1.1pt}}
+  \end{center}
+  \vspace{0.2\baselineskip}
+}
+
+% The separator between fields on one line. A middle dot with air around it,
+% in the muted colour so it groups the fields without competing with them.
+\newcommand{\rzheadsep}{\,{\color{rzmuted}\textperiodcentered}\,}
+
+\NewDocumentCommand{\HomeworkFigure}{O{0.75\linewidth} m m m m}{%
+  \par\addvspace{0.8\baselineskip}%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{#2}{%
+      \includegraphics[width=#1,alt={#4}]{#2}%
+    }{%
+      \PackageWarning{ricardo-homework}{Image `#2' not found}%
+      \fcolorbox{rzerror}{white}{%
+        \parbox[c][0.18\textheight][c]{0.72\linewidth}{%
+          \centering\color{rzerror}\textbf{Image not found}\par
+          \texttt{\detokenize{#2}}%
+        }%
+      }%
+    }
+    \caption{#3}
+    \label{#5}
+  \end{figure}%
+  \par\addvspace{0.8\baselineskip}%
+}
+
+\NewDocumentCommand{\HomeworkDiagram}{O{0.85\linewidth} m m m m}{%
+  \HomeworkFigure[#1]{assets/diagrams/#2.pdf}{#3}{#4}{#5}%
+}
