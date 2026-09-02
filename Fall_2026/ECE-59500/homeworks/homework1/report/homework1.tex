@@ -63,7 +63,7 @@ Using the folders, I grouped the contents like this:
 Now, for this part of the assignment, I tried to run the command provided to run the ``hello world,'' but I got this message.
 
 \TermHost{ricardo}
-\TermPath{homework1}
+\TermPath{homework1/problems}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{qemu-arm cpu-emu-test}
@@ -88,7 +88,7 @@ Checking with my trusty LLM, I realized that I was missing the package \code{qem
 Now, it runs correctly!
 
 \TermHost{ricardo}
-\TermPath{homework1}
+\TermPath{homework1/problems}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{qemu-arm cpu-emu-test}
@@ -101,7 +101,7 @@ Continuing with the assignment, I ran the command to emulate a machine:
 \TermPath{~}
 \TermTitle{Terminal}
 \begin{terminal}
-\cmd{qemu-system-arm -machine xilinx-zynq-a9}
+\cmd{qemu-system-arm -machine mcimx6ul-evk}
 VNC server running on ::1:5900
 \end{terminal}
 
@@ -122,7 +122,7 @@ Now, my updated command works correctly:
 \TermPath{~}
 \TermTitle{Terminal}
 \begin{terminal}
-\cmd{qemu-system-arm -machine xilinx-zynq-a9 -display none -monitor stdio}
+\cmd{qemu-system-arm -machine mcimx6ul-evk -display none -monitor stdio}
 
 QEMU 11.1.1 monitor - type 'help' for more information
 (qemu)
@@ -146,7 +146,7 @@ top:
 To build this, I ran the commands recommended in the readings:
 
 \TermHost{ricardo}
-\TermPath{homework1}
+\TermPath{homework1/problems}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{arm-none-eabi-as babysteps.s -o babysteps.o}
@@ -184,5 +184,237 @@ int start(){
 \end{codebox}
 
 It contains an endless loop with an assignment of an XOR operation.
+
+\section{Studying the compiled binary}
+
+I ran the command \code{readelf} as shown in the reading.
+
+\TermHost{ricardo}
+\TermPath{homework1/problems}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{readelf -h babysteps.elf}
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           ARM
+  Version:                           0x1
+  Entry point address:               0x8000
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          4580 (bytes into file)
+  Flags:                             0x5000200, Version5 EABI, soft-float ABI
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         1
+  Size of section headers:           40 (bytes)
+  Number of section headers:         8
+  Section header string table index: 7
+\end{terminal}
+
+After investigating documentation, the command \code{readelf} displays all the information related to ELF files.
+ELF files are usually executable files in Unix systems.
+
+Summarizing the information there:
+
+\begin{itemize}
+    \item \textbf{Magic:} Traditional file magic number. The bytes \texttt{7f 45 4c 46} correspond to the ELF magic number.
+    \item \textbf{Class:} 32-bit ELF format.
+    \item \textbf{Data:} Little-endian representation.
+    \item \textbf{Version:} ELF format version.
+    \item \textbf{OS/ABI:} Operating system and ABI for which the file was generated.
+    \item \textbf{ABI Version:} Version of the specified ABI.
+    \item \textbf{Type:} ELF file type. \texttt{EXEC} means that it is an executable file.
+    \item \textbf{Machine:} Target processor architecture.
+    \item \textbf{Version:} ELF object file version.
+    \item \textbf{Entry point address:} Address where program execution begins.
+    \item \textbf{Start of program headers:} Offset from the beginning of the file to the program header table.
+    \item \textbf{Start of section headers:} Offset from the beginning of the file to the section header table.
+    \item \textbf{Flags:} Architecture-specific flags.
+    \item \textbf{Size of this header:} Size of the ELF header.
+    \item \textbf{Size of program headers:} Size of each entry in the program header table.
+    \item \textbf{Number of program headers:} Number of entries in the program header table.
+    \item \textbf{Size of section headers:} Size of each entry in the section header table.
+    \item \textbf{Number of section headers:} Number of entries in the section header table.
+    \item \textbf{Section header string table index:} Specifies which section header contains the string table used to store section names.
+\end{itemize}
+
+I ran the command \code{readelf} with the flag \code{--section-headers} to get more information.
+
+\TermHost{ricardo}
+\TermPath{homework1/problems}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{readelf --section-headers babysteps.elf}
+There are 8 section headers, starting at offset 0x11e4:
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        00008000 001000 000008 00  AX  0   0  4
+  [ 2] .persistent       PROGBITS        00009008 001008 000000 00  WA  0   0  4
+  [ 3] .noinit           NOBITS          00009008 000000 000000 00  WA  0   0  4
+  [ 4] .ARM.attributes   ARM_ATTRIBUTES  00000000 001008 000012 00      0   0  1
+  [ 5] .symtab           SYMTAB          00000000 00101c 000120 10      6   8  4
+  [ 6] .strtab           STRTAB          00000000 00113c 000062 00      0   0  1
+  [ 7] .shstrtab         STRTAB          00000000 00119e 000045 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  D (mbind), y (purecode), p (processor specific)
+\end{terminal}
+
+Again, I investigated about the information here and I summarize it:
+
+\begin{itemize}
+    \item \textbf{Index 0:} Empty by convention.
+    \item \textbf{.text:} Executable instructions of the program. It is allocated in memory and executable.
+    \item \textbf{.persistent:} Data intended to persist across certain executions or resets. It is writable and allocated.
+    \item \textbf{.noinit:} Uninitialized data that requires memory space but does not need to be stored in the ELF file. It is writable and allocated.
+    \item \textbf{.ARM.attributes:} ARM-specific metadata describing architecture and ABI attributes.
+    \item \textbf{.symtab:} The symbol table contains information about functions and variables.
+    \item \textbf{.strtab:} String table containing the names of functions and variables.
+    \item \textbf{.shstrtab:} The string table with the names of the sections.
+\end{itemize}
+
+\section{Disassembling the compiled binary}
+Let's disassemble the ELF file we got.
+
+\TermHost{ricardo}
+\TermPath{homework1/problems}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{arm-none-eabi-objdump -D babysteps.elf}
+
+babysteps.elf:     file format elf32-littlearm
+
+
+Disassembly of section .text:
+
+00008000 <_start>:
+    8000:       e0211001        eor     r1, r1, r1
+    8004:       eafffffd        b       8000 <_start>
+
+Disassembly of section .ARM.attributes:
+
+00000000 <.ARM.attributes>:
+   0:   00001141        andeq   r1, r0, r1, asr #2
+   4:   61656100        cmnvs   r5, r0, lsl #2
+   8:   01006962        tsteq   r0, r2, ror #18
+   c:   00000007        andeq   r0, r0, r7
+  10:   Address 0x10 is out of bounds.
+\end{terminal}
+
+According to the output we got, I see in the \code{.text} section the code disassembled.
+The output includes memory addresses, but its logic is the same as the source code we had before.
+
+Cleaning up the output of the disassembling command, I would recover the data like this:
+
+\begin{codebox}[asm]{babysteps_recovered.s}
+_start:
+    eor     r1, r1, r1
+    b       _start
+\end{codebox}
+
+I noticed the following points and I tried to give the best explanation I could:
+
+\begin{enumerate}
+    \item \textbf{\code{.global} keyword is gone:} Investigating a little bit about this, the way to discover if a label is global is checking the symbol table. Using the command \code{readelf -s babysteps.elf}, I was able to see it as global.
+    \item \textbf{Label \code{top:} is gone:} In my experience working in compilers, it should've been removed by some sort of compiler optimization. It is clear that this label was not necessary due to the existence of top in the same memory address.
+    \item \textbf{\code{eor} instruction now has 3 parameters:} This is because the original \code{eor r1, r1} is just a shortcut of the 3-parameter version because the destination register is the same as the first operand of the XOR operation.
+\end{enumerate}
+
+Essentially, the changes are for optimization, but the semantics of the sources are equivalent.
+
+\section{Running ARM binaries we just built}
+
+To run the binaries in an emulated machine, I crafted the following command.
+
+\TermHost{ricardo}
+\TermPath{homework1/problems}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-system-arm \\}
+    -machine mcimx6ul-evk \\
+    -kernel babysteps.elf \\
+    -display none \\
+    -monitor stdio
+QEMU 11.1.1 monitor - type 'help' for more information
+(qemu) stop
+(qemu) info registers
+
+CPU#0
+R00=00000000 R01=00000000 R02=00000000 R03=00000000
+R04=00000000 R05=00000000 R06=00000000 R07=00000000
+R08=00000000 R09=00000000 R10=00000000 R11=00000000
+R12=00000000 R13=00000000 R14=00000000 \textbf{R15=00008000}
+...
+FPSCR: 00000000
+(qemu) quit
+\end{terminal}
+
+I removed part of the output to keep only the important information; I put \(\ldots\) where I cut the info.
+
+The program didn't print any info (because it is not supposed to do so), but I can see that the register \code{R15=00008000} is moving in the endless loop.
+
+To run this, I had to:
+\begin{itemize}
+    \item Install the required packages in my Arch Linux installation using pacman.
+    \begin{itemize}
+        \item The required compiler extensions.
+        \item Utils for binaries.
+        \item QEMU as the full hardware emulator (\code{qemu-system-arm}).
+    \end{itemize}
+    \item Build a sample assembly \filepath{babysteps.s} and then run it in a full hardware emulation of the board \code{mcimx6ul-evk}.
+\end{itemize}
+
+Now, I investigated (with a little bit of help of my agent) which board in the catalog of emulable boards is the closest to the \code{USB Armory MKII}.
+
+I found the board \code{mcimx6ul-evk} as the closest for the following reasons:
+
+\begin{itemize}
+    \item Both use processors from the \code{NXP i.MX6UL} family.
+    \item Both use an \code{ARM Cortex-A7 CPU} core.
+    \item The emulated board has peripherals and a memory layout similar to those of an embedded \code{i.MX6UL} system.
+\end{itemize}
+
+I will continue using this \code{mcimx6ul-evk} board from now on.
+
+\begin{callout}[Extra Credit]
+Modify the assembly code to print a string to the serial0 port upon startup.
+\end{callout}
+
+For this, I modified the file as follows:
+
+\begin{codebox}[asm]{babysteps_serial.s}
+.equ UART1_UTXD, 0x02020040
+
+.section .text
+.global _start
+
+_start:
+    ldr r0, =message
+    ldr r1, =UART1_UTXD
+
+print_character:
+    ldrb r2, [r0], #1
+    cmp r2, #0
+    beq finished
+    str r2, [r1]
+    b print_character
+
+finished:
+    b finished
+
+message:
+    .asciz "Hello from serial0!\r\n"
+\end{codebox}
+
+
 
 \input{../template/assignment-end}
