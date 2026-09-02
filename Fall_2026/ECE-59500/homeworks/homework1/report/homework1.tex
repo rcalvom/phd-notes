@@ -63,7 +63,7 @@ Using the folders, I grouped the contents like this:
 Now, for this part of the assignment, I tried to run the command provided to run the ``hello world,'' but I got this message.
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{qemu-arm cpu-emu-test}
@@ -88,7 +88,7 @@ Checking with my trusty LLM, I realized that I was missing the package \code{qem
 Now, it runs correctly!
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{qemu-arm cpu-emu-test}
@@ -146,10 +146,10 @@ top:
 To build this, I ran the commands recommended in the readings:
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
-\cmd{arm-none-eabi-as babysteps.s -o babysteps.o}
+\cmd{arm-none-eabi-as -g babysteps.s -o babysteps.o}
 \cmd{arm-none-eabi-ld -g babysteps.o -o babysteps.elf}
 \end{terminal}
 
@@ -160,7 +160,7 @@ Investigating by myself, I was able to understand what those commands do:
     It reads the file \filepath{babysteps.s} and then the flag \code{-o} indicates the output path \filepath{babysteps.o}.
     \item The second command \filepath{arm-none-eabi-ld} links the object file assigning memory addresses and resolving symbols.
     It reads the file \filepath{babysteps.o} and then the flag \code{-o} indicates the output path \filepath{babysteps.elf}.
-    The flag \code{-g} is just a compatibility flag; it is ignored.
+    The flag \code{-g} is just a flag for debugging tools.
 \end{itemize}
 
 Now, decomposing the assembly source code, I would describe it as follows:
@@ -190,7 +190,7 @@ It contains an endless loop with an assignment of an XOR operation.
 I ran the command \code{readelf} as shown in the reading.
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{readelf -h babysteps.elf}
@@ -246,7 +246,7 @@ Summarizing the information there:
 I ran the command \code{readelf} with the flag \code{--section-headers} to get more information.
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{readelf --section-headers babysteps.elf}
@@ -286,7 +286,7 @@ Again, I investigated about the information here and I summarize it:
 Let's disassemble the ELF file we got.
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{arm-none-eabi-objdump -D babysteps.elf}
@@ -336,7 +336,7 @@ Essentially, the changes are for optimization, but the semantics of the sources 
 To run the binaries in an emulated machine, I crafted the following command.
 
 \TermHost{ricardo}
-\TermPath{homework1/problems}
+\TermPath{homework1}
 \TermTitle{Terminal}
 \begin{terminal}
 \cmd{qemu-system-arm \\}
@@ -394,7 +394,6 @@ For this, I modified the file as follows:
 \begin{codebox}[asm]{babysteps_serial.s}
 .equ UART1_UTXD, 0x02020040
 
-.section .text
 .global _start
 
 _start:
@@ -404,17 +403,110 @@ _start:
 print_character:
     ldrb r2, [r0], #1
     cmp r2, #0
-    beq finished
+    beq .
     str r2, [r1]
     b print_character
-
-finished:
-    b finished
 
 message:
     .asciz "Hello from serial0!\r\n"
 \end{codebox}
 
+More details about this:
 
+\begin{itemize}
+    \item \code{.equ UART1\_UTXD, 0x02020040} defines the address of the UART1 transmit register, which QEMU connects to the \code{serial0} output.
+    \item \code{.global \_start} makes the entry symbol globally visible.
+    \item The first two \code{ldr} instructions store the address of the message in \code{r0} and the address of the UART transmit register in \code{r1}.
+    \item \code{ldrb r2, [r0], \#1} reads one byte of the message into \code{r2} and increments \code{r0} to point to the next character.
+    \item \code{cmp r2, \#0} and \code{beq .} detect the null byte at the end of the string and stay at the current instruction forever.
+    \item \code{str r2, [r1]} writes the character to the UART transmit register, and \code{b print\_character} repeats the process for the next character.
+    \item \code{.asciz} stores the message with a null byte at the end; \code{\textbackslash r\textbackslash n} are a carriage return and a new line.
+\end{itemize}
+
+Now, building and executing it.
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{arm-none-eabi-as babysteps_serial.s -o babysteps_serial.o}
+\cmd{arm-none-eabi-ld babysteps_serial.o -o babysteps_serial.elf}
+\cmd{qemu-system-arm \\ }
+    -machine mcimx6ul-evk \\
+    -kernel babysteps_serial.elf \\
+    -display none \\
+    -monitor none \\
+    -serial stdio
+Hello from serial0!
+\end{terminal}
+
+\section{Debugging our environment}
+
+Let's install the debugger.
+
+\TermHost{ricardo}
+\TermPath{~}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{sudo pacman -S --needed arm-none-eabi-gdb}
+\end{terminal}
+
+Now, I ran the sample program in one terminal and the debugger in another terminal.
+
+I had to replace the flag \code{-singlestep} with \code{-one-insn-per-tb} because the former is not available in the latest version of QEMU \code{(QEMU 11.1.1)}.
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 1}
+\begin{terminal}
+\cmd{qemu-arm -one-insn-per-tb -g 1234 babysteps.elf}
+\textit{(Waiting for connection...)}
+\end{terminal}
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 2}
+\begin{terminal}
+\cmd{arm-none-eabi-gdb}
+GNU gdb (GDB) 17.2
+Copyright (C) 2025 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "--host=x86_64-pc-linux-gnu --target=arm-none-eabi".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<https://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word".
+(gdb) file babysteps.elf
+Reading symbols from babysteps.elf...
+(gdb) target remote localhost:1234
+Remote debugging using localhost:1234
+_start () at babysteps.s:5
+5           eor r1, r1
+(gdb) b babysteps.s:4
+Breakpoint 1 at 0x8000: file babysteps.s, line 5.
+(gdb) c
+Continuing.
+
+Breakpoint 1, _start () at babysteps.s:5
+5           eor r1, r1
+\end{terminal}
+
+What I did so far is the following step-by-step:
+
+\begin{enumerate}
+    \item I ran \filepath{babysteps.elf}, opening the port \code{1234} for debugging.
+    \item In the second terminal, I opened the debugger \code{GDB}.
+    \item Then, I used \filepath{file babysteps.elf} to load the symbols of that file.
+    \item Then, I connected to the emulated program via port 1234 of the localhost.
+    \item I set a breakpoint at the beginning of the endless loop; then the program stopped there.
+    \item Finally, I continued the execution, but the program hit the breakpoint again after going up in the loop.
+\end{enumerate}
 
 \input{../template/assignment-end}
