@@ -8,9 +8,9 @@ That is why the engine is `lualatex` and not `pdflatex`.
 
 ## Repository Structure
 
-- `homework.tex` assembles an assignment.
-- `fragments/metadata.tex` contains assignment metadata and public placeholders.
-- `fragments/problems/` contains one numbered source file per problem.
+- `assignment-preamble.tex`, `assignment-begin.tex`, and `assignment-end.tex` assemble course assignments.
+- `fragments/metadata.tex` contains metadata shared by every course assignment.
+- Each sibling `homeworkN/homeworkN.tex` contains all task-specific metadata and content.
 - `showcase.tex` and `fragments/showcase/` are living documentation for every supported component.
 - `theme/` contains the visual system and public LaTeX environments.
 - `assets/img/` contains ordinary figures.
@@ -21,15 +21,15 @@ That is why the engine is `lualatex` and not `pdflatex`.
 ## Editing Guidelines
 
 - Write content, code comments, documentation, and commit messages in English.
-- Keep metadata in `fragments/metadata.tex`; do not put personal data in the reusable template.
-- Add problems as `fragments/problems/010-name.tex`, `020-name.tex`, and so on, then include them explicitly from `homework.tex`.
+- Keep student, course, and instructor metadata in `fragments/metadata.tex`.
+- Keep each assignment's title, date, problems, and solutions together in its single `homeworkN.tex` file.
 - Preserve the restrained light design, the standard `article` class, and the two-family split: LaTeX's serif for prose and mathematics, UbuntuMono for anything that is code.
 - Do not set body text in the monospace face. The slides project is all-monospace because a slide holds a sentence; a homework holds proofs.
 - Diagrams compile through PostScript (`rsvg-convert -f ps` then `ps2pdf` with a pinned `SOURCE_DATE_EPOCH`), not through `rsvg-convert -f pdf`.
   The direct route keeps the labels in the text layer but writes different bytes on every run, which breaks the CI check that a committed diagram still matches its source.
   The PostScript route is byte-reproducible and outlines the glyphs, so a diagram contributes nothing to the text layer and its `\Description` is the only thing a screen reader gets.
   Both halves of that trade are real; do not flip it without deciding which one matters more.
-- A document is a folder: `\DocFolder` inputs every `.tex` in one, in name order, so adding a problem is creating a file. Do not add `\input` lines to `homework.tex` or `showcase.tex`.
+- Keep `\DocFolder` for the standalone template and showcase; course assignments do not split problems into fragments.
 - Every `\HomeworkFigure` and `\HomeworkDiagram` must have a meaningful caption, alt text, and label.
 - Edit D2 sources, not generated SVG or PostScript files. Run `make diagrams` and commit the generated PDF with its source.
 - Do not commit LaTeX auxiliary files or minted caches.
@@ -45,7 +45,7 @@ They are recorded so a later session improves the template instead of relitigati
   UbuntuMono is for code, terminal transcripts and inline identifiers only.
   Do not set body text in the monospace face: the slides project is all-monospace because a slide holds a sentence, and a homework holds proofs.
 - **The title block is centred**, in the manner of a journal article, chosen over a left rail, a mono kicker and a tinted plate.
-  Title, what the assignment is, who is handing it in, the course, the date, then instructor and collaborators last and smallest.
+  Title, what the assignment is, who is handing it in, the course, the date, then the instructor last and smallest.
 - **Headings are accent blue.**
   Setting them in ink was tried and reverted: with black headings the accent survives only on callout labels, the code tab and links, and the page reads more sober but less like the rest of the family.
 - **The running head is two anchors** -- course left, assignment right, with an accent hairline under them.

@@ -1,2 +1,24 @@
 # Homework template
 **/.github
+
+# LaTeX build artifacts
+**/*.aux
+**/*.bbl
+**/*.bcf
+**/*.blg
+**/*.fdb_latexmk
+**/*.fls
+**/*.listing
+**/*.lof
+**/*.log
+**/*.lot
+**/*.out
+**/*.pyg
+**/*.pygstyle
+**/*.pygtex
+**/*.run.xml
+**/*.synctex.gz
+**/*.toc
+**/*-luamml-mathml.html
+**/_minted*/
+**/_*.*.minted

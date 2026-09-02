@@ -2,6 +2,10 @@
 
 A restrained LaTeX template for university assignments.
 
+In the ECE 69500 course folder, this directory is shared by every assignment.
+Each sibling `homeworkN/` directory only needs one `homeworkN.tex` source; the
+shared metadata, theme, fonts, scripts, and bibliography remain here.
+
 The body keeps LaTeX's own serif and generous spacing, because a homework is paragraphs of prose, proofs and mathematics and that is what those are set in.
 Code is different: listings, terminal transcripts and inline identifiers are set in **UbuntuMono**, on the same plate the [slides template](https://github.com/rcalvom/personal-slides-template) uses, with the same palette taken from `~/.config/nvim/lua/ricardo/colors.lua`.
 A listing here and a listing on a slide are recognisably the same object.
@@ -23,16 +27,23 @@ make
 
 ## Getting Started
 
-1. Edit `fragments/metadata.tex`.
-2. Replace the example files in `fragments/problems/`.
-3. Include each problem explicitly from `homework.tex` in submission order.
-4. Put images in `assets/img/` and D2 sources in `assets/diagrams/`.
-5. Add BibTeX entries to `references.bib`.
-6. Set `\TemplateStatus` to `final`, freeze the date, and run `make submission-check` before submitting the PDF.
-
-Number problem files with room to insert new work later: `010`, `020`, `030`, and so on. Explicit `\input` lines make the submission order visible without generated manifests or engine-specific directory scanning.
+1. Set the shared student information once in `fragments/metadata.tex`.
+2. Write each assignment entirely in its sibling `homeworkN/homeworkN.tex` file.
+3. Add shared BibTeX entries to `references.bib`.
+4. Set `\TemplateStatus` to `final`, freeze the date, and run the assignment check before submitting the PDF.
 
 ## Build
+
+From this directory, build a course assignment with:
+
+```bash
+make assignment HOMEWORK=homework1
+make assignment-check HOMEWORK=homework1
+```
+
+Write all Homework 1 content in `../homework1/homework1.tex`. The generated
+file is `../homework1/submission.pdf`, so an assignment handout named
+`homework.pdf` is never overwritten.
 
 | Command | Result |
 |---|---|
@@ -163,15 +174,15 @@ Use standard Natbib commands such as `\citet{key}` and `\citep{key}`. Add record
 ## Layout
 
 ```text
-homework.tex                 assignment assembly
+assignment-*.tex             shared assignment assembly
 showcase.tex                 component catalogue
-fragments/metadata.tex       editable assignment metadata
-fragments/problems/          one file per problem
+fragments/metadata.tex       shared course metadata
 fragments/showcase/          catalogue content
 assets/img/                  figures
 assets/diagrams/             D2 sources and generated PDFs
 theme/                       typography, palette, boxes, code, layouts
 scripts/                     automated checks
+../homeworkN/homeworkN.tex    complete assignment source
 ```
 
 The generated `homework.pdf` and `showcase.pdf` are tracked so the repository can be previewed directly on GitHub. `make clean` preserves them; `make distclean` removes them.

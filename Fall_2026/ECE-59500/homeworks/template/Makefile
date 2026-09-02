@@ -11,12 +11,17 @@
 #   make check-glyphs     verify every declared icon exists in the font
 #   make check-all        also require PDF/UA-2 validation with veraPDF
 #   make submission-check fail if template metadata remains
+#   make assignment HOMEWORK=homework1
+#                        build ../homework1/submission.pdf
+#   make assignment-check HOMEWORK=homework1
+#                        build and validate one course assignment
 #   make clean            remove auxiliary files, preserving tracked PDFs
 #   make distclean        also remove homework.pdf and showcase.pdf
 # =====================================================================
 
 MAIN       := homework
 SHOWCASE   := showcase
+HOMEWORK   ?=
 PDF_ENGINE := lualatex
 TEXMFVAR   := /tmp/texmf-var
 TEXFLAGS   := -interaction=nonstopmode -halt-on-error -file-line-error
@@ -24,6 +29,10 @@ TEXENV     := TEXMFVAR=$(TEXMFVAR) TERM=$${TERM:-dumb}
 
 PDF          := $(MAIN).pdf
 SHOWCASE_PDF := $(SHOWCASE).pdf
+ASSIGNMENT_DIR := ../$(HOMEWORK)
+ASSIGNMENT_SOURCE := $(ASSIGNMENT_DIR)/$(HOMEWORK).tex
+ASSIGNMENT_JOB := submission
+ASSIGNMENT_PDF := $(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).pdf
 
 THEME_FILES    := $(shell find theme -type f -name '*.sty' | sort)
 FRAGMENT_FILES := $(shell find fragments -type f -name '*.tex' | sort)
@@ -48,7 +57,8 @@ VERAPDF ?= verapdf
 
 .DEFAULT_GOAL := pdf
 
-.PHONY: all pdf showcase diagrams watch open check check-homework check-all check-sources \
+.PHONY: all pdf showcase assignment assignment-check diagrams watch open check \
+        check-homework check-all check-sources \
         check-logs check-pdf check-contrast check-glyphs check-pdfua submission-check \
         clean distclean docker-build docker-shell help
 
@@ -86,6 +96,44 @@ $(PDF): $(SOURCES)
 
 $(SHOWCASE_PDF): $(SHOWCASE_SOURCES)
 	$(call build,$(SHOWCASE),$(SHOWCASE))
+
+assignment:
+	@test -n "$(HOMEWORK)" || { \
+	  echo "HOMEWORK is required (example: make assignment HOMEWORK=homework1)"; exit 2; }
+	@test -f "$(ASSIGNMENT_SOURCE)" || { \
+	  echo "$(ASSIGNMENT_SOURCE) not found"; exit 2; }
+	@rm -f "$(ASSIGNMENT_PDF)"
+	@echo ">> $(HOMEWORK): LaTeX pass 1"
+	@env $(TEXENV) TEXINPUTS="$(ASSIGNMENT_DIR):" $(PDF_ENGINE) $(TEXFLAGS) \
+	  -jobname=$(ASSIGNMENT_JOB) -output-directory="$(ASSIGNMENT_DIR)" \
+	  "$(ASSIGNMENT_SOURCE)" >/dev/null || { \
+	  python3 scripts/check-logs.py "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).log" || true; \
+	  rm -f "$(ASSIGNMENT_PDF)"; exit 1; }
+	@if grep -q '\\citation' "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).aux"; then \
+	  echo ">> $(HOMEWORK): BibTeX"; \
+	  env $(TEXENV) bibtex "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB)" >/dev/null || { \
+	    rm -f "$(ASSIGNMENT_PDF)"; exit 1; }; \
+	else \
+	  : > "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).bbl"; \
+	fi
+	@n=2; while [ $$n -le 5 ]; do \
+	  echo ">> $(HOMEWORK): LaTeX pass $$n"; \
+	  env $(TEXENV) TEXINPUTS="$(ASSIGNMENT_DIR):" $(PDF_ENGINE) $(TEXFLAGS) \
+	    -jobname=$(ASSIGNMENT_JOB) -output-directory="$(ASSIGNMENT_DIR)" \
+	    "$(ASSIGNMENT_SOURCE)" >/dev/null || { \
+	      python3 scripts/check-logs.py "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).log" || true; \
+	      rm -f "$(ASSIGNMENT_PDF)"; exit 1; }; \
+	  if [ $$n -ge 3 ] && ! grep -qE \
+	    "Rerun to get|Label\\(s\\) may have changed" \
+	    "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).log"; then break; fi; \
+	  n=$$((n + 1)); \
+	done
+	@python3 scripts/check-logs.py "$(ASSIGNMENT_DIR)/$(ASSIGNMENT_JOB).log" || { \
+	  rm -f "$(ASSIGNMENT_PDF)"; exit 1; }
+
+assignment-check: assignment
+	@python3 scripts/check-pdf.py "$(ASSIGNMENT_PDF)"
+	@python3 scripts/check-metadata.py fragments/metadata.tex "$(ASSIGNMENT_SOURCE)"
 
 assets/diagrams/%.pdf: assets/diagrams/%.d2 assets/diagrams/_theme.d2
 	@command -v d2 >/dev/null 2>&1 || { \

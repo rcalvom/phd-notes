@@ -1,0 +1,188 @@
+\input{../template/assignment-preamble}
+
+\renewcommand{\TemplateStatus}{template}
+\renewcommand{\HomeworkTitle}{Preliminaries}
+\renewcommand{\HomeworkSubtitle}{}
+\renewcommand{\SubmissionDate}{\today}
+
+\input{../template/assignment-begin}
+
+\section{Installing the Required Tools}
+I use Arch Linux as my operating system.
+I use \code{pacman} to manage packages.
+
+I found that the package names listed in the assignment correspond directly to packages in \code{pacman}.
+I used the \code{--needed} flag to avoid reinstalling packages if they were already present in my system.
+
+\TermHost{ricardo}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{sudo pacman -S --needed arm-none-eabi-gcc}
+\cmd{sudo pacman -S --needed arm-none-eabi-binutils}
+\cmd{sudo pacman -S --needed qemu-system-arm}
+\end{terminal}
+
+Now, I ran the \code{-Ql} flag on each of them to see which files those packages brought to my computer.
+I realized that the output was super long, so I redirected it to a file.
+
+\TermHost{ricardo}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{pacman -Ql arm-none-eabi-gcc > arm-none-eabi-gcc-files.txt}
+\cmd{pacman -Ql arm-none-eabi-binutils > arm-none-eabi-binutils-files.txt}
+\cmd{pacman -Ql qemu-system-arm > qemu-system-arm-files.txt}
+\end{terminal}
+
+\textbf{For \code{arm-none-eabi-gcc}:} It contains 2,969 entries.
+Using the folders, I grouped the contents like this:
+\begin{enumerate}
+    \item The path \filepath{/usr/arm-none-eabi/include/c++/} contains \(\sim\)1,650 entries (\(\sim\)56\%) consisting mainly of C++ headers.
+    \item The path \filepath{/usr/arm-none-eabi/lib/} contains \(\sim\)250 entries (\(\sim\)9\%) related to the required libraries for the package.
+    \item The path \filepath{/usr/bin/} contains \(\sim\)20 entries (\(\sim\)1\%) related to the executables.
+    I assume this because it is included in my \code{\$PATH}.
+    \item The path \filepath{/usr/lib/gcc/arm-none-eabi/} contains \(\sim\)1,000 entries (35\%) related to GCC drivers.
+    \item The last path \filepath{/usr/share/man/} contains manual pages for the installed commands.
+\end{enumerate}
+
+\textbf{For \code{arm-none-eabi-binutils}:} It contains 84 entries.
+\begin{enumerate}
+    \item The path \filepath{/usr/arm-none-eabi/bin/} contains \(\sim\)10 entries (\(\sim\)12\%) consisting mainly of binaries.
+    \item The path \filepath{/usr/arm-none-eabi/lib/} contains \(\sim\)20 entries (\(\sim\)24\%) related to the required libraries for the package.
+    \item The path \filepath{/usr/bin/} contains \(\sim\)15 entries (\(\sim\)18\%) related to the executables.
+    \item The path \filepath{/usr/share/man/} contains the remaining files (\(\sim\)46\%) for manual pages.
+\end{enumerate}
+
+\textbf{For \code{qemu-system-arm}:} It contains only 16 entries.
+\begin{enumerate}
+    \item The executable in the path \filepath{/usr/bin/}.
+    \item Some licenses in the path \filepath{/usr/share/licenses/}.
+    \item Manual pages at the path \filepath{/usr/share/man/}.
+\end{enumerate}
+
+\section{qemu-system-arm}
+Now, for this part of the assignment, I tried to run the command provided to run the ``hello world,'' but I got this message.
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-arm cpu-emu-test}
+zsh: command not found: qemu-arm
+\end{terminal}
+
+Checking with my trusty LLM, I realized that I was missing the package \code{qemu-user}, so I installed it using \code{pacman} as I did before.
+
+\TermHost{ricardo}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{sudo pacman -S --needed qemu-user}
+\end{terminal}
+
+\textbf{For \code{qemu-user}:} It contains only 45 entries.
+\begin{enumerate}
+    \item Some required tool executables in the path \filepath{/usr/bin/}.
+    \item Manual pages at the path \filepath{/usr/share/man/} as usual.
+\end{enumerate}
+
+
+Now, it runs correctly!
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-arm cpu-emu-test}
+Hello world!
+\end{terminal}
+
+Continuing with the assignment, I ran the command to emulate a machine:
+
+\TermHost{ricardo}
+\TermPath{~}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-system-arm -machine xilinx-zynq-a9}
+VNC server running on ::1:5900
+\end{terminal}
+
+I was expecting a monitor interface as shown in the reading.
+I again asked my trusty LLM for options to solve this problem.
+
+I have two options to address this:
+
+\begin{enumerate}
+    \item To install \code{qemu-ui-gtk} that would provide my system with a GTK interface to the emulated machine.
+    \item To add the flags \code{-display none -monitor stdio} so it will directly open the monitor in my terminal emulator.
+\end{enumerate}
+
+I chose option 2 because I prefer to avoid unnecessary packages.
+Now, my updated command works correctly:
+
+\TermHost{ricardo}
+\TermPath{~}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-system-arm -machine xilinx-zynq-a9 -display none -monitor stdio}
+
+QEMU 11.1.1 monitor - type 'help' for more information
+(qemu)
+\end{terminal}
+
+Now the setup is completed!
+
+\section{Building ARM binaries}
+
+Let's save the file \filepath{babysteps.s} with the recommended formatting:
+
+\begin{codebox}[asm]{babysteps.s}
+.global _start
+
+_start:
+top:
+    eor r1, r1
+    b top
+\end{codebox}
+
+To build this, I ran the commands recommended in the readings:
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{arm-none-eabi-as babysteps.s -o babysteps.o}
+\cmd{arm-none-eabi-ld -g babysteps.o -o babysteps.elf}
+\end{terminal}
+
+Investigating by myself, I was able to understand what those commands do:
+
+\begin{itemize}
+    \item The first command \filepath{arm-none-eabi-as} builds an object file for ARM architecture.
+    It reads the file \filepath{babysteps.s} and then the flag \code{-o} indicates the output path \filepath{babysteps.o}.
+    \item The second command \filepath{arm-none-eabi-ld} links the object file assigning memory addresses and resolving symbols.
+    It reads the file \filepath{babysteps.o} and then the flag \code{-o} indicates the output path \filepath{babysteps.elf}.
+    The flag \code{-g} is just a compatibility flag; it is ignored.
+\end{itemize}
+
+Now, decomposing the assembly source code, I would describe it as follows:
+\begin{itemize}
+    \item \code{.global \_start} declares the symbol \code{\_start} as global.
+    \item \code{\_start:} indicates that the symbol \code{\_start} starts in that position.
+    \item \code{top:} indicates that the symbol \code{top} starts in that position.
+    \item \code{eor r1, r1} indicates an XOR operation. The evaluation of r1 \(\oplus\) r1 is assigned to r1.
+    \item \code{b top} indicates a jump to the \code{top:} symbol.
+\end{itemize}
+
+I would summarize the assembly as the following ``equivalent'' \code{C} code that is more human-readable:
+
+\begin{codebox}[c]{babysteps.c}
+int start(){
+    int r1;
+    while(1){
+        r1 = r1 ^ r1;
+    }
+}
+\end{codebox}
+
+It contains an endless loop with an assignment of an XOR operation.
+
+\input{../template/assignment-end}

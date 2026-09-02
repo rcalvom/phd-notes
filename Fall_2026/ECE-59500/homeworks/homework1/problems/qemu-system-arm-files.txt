@@ -1,0 +1,16 @@
+qemu-system-arm /usr/
+qemu-system-arm /usr/bin/
+qemu-system-arm /usr/bin/qemu-system-arm
+qemu-system-arm /usr/share/
+qemu-system-arm /usr/share/licenses/
+qemu-system-arm /usr/share/licenses/qemu-system-arm/
+qemu-system-arm /usr/share/licenses/qemu-system-arm/BSD-2-Clause.txt
+qemu-system-arm /usr/share/licenses/qemu-system-arm/LICENSE
+qemu-system-arm /usr/share/licenses/qemu-system-arm/audio.LICENSE.ISC.txt
+qemu-system-arm /usr/share/licenses/qemu-system-arm/edk2-licenses.txt
+qemu-system-arm /usr/share/licenses/qemu-system-arm/fuse.LICENSE.BSD-2-Clause.txt
+qemu-system-arm /usr/share/licenses/qemu-system-arm/tcg.LICENSE.MIT.txt
+qemu-system-arm /usr/share/licenses/qemu-system-arm/tci.LICENSE.MIT.txt
+qemu-system-arm /usr/share/man/
+qemu-system-arm /usr/share/man/man1/
+qemu-system-arm /usr/share/man/man1/qemu-system-arm.1.gz

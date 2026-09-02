@@ -5,7 +5,9 @@
 }
 \documentclass[letterpaper,11pt]{article}
 
-\input{fragments/metadata}
+% Override this from the build command to use assignment-specific sources.
+\providecommand{\HomeworkSourceDir}{fragments}
+\input{\HomeworkSourceDir/metadata}
 \usepackage{theme/ricardo-homework}
 
 \hypersetup{
@@ -20,7 +22,7 @@
 \makehomeworktitle
 
 % Every .tex in the folder, in name order. Adding one is creating a file.
-\DocFolder{fragments/problems}
+\DocFolder{\HomeworkSourceDir/problems}
 
 \bibliographystyle{plainnat}
 \bibliography{references}

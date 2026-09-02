@@ -10,9 +10,8 @@
 % handing it in, then the course, then the date -- a reader scanning a stack
 % of these finds the name and the number in the same place every time.
 %
-% Instructor and collaborators sit last and smallest. They are required on a
-% homework and read by nobody until they matter, which is exactly what a
-% footnote-sized line at the bottom of a header is for.
+% The instructor sits last and smallest: useful metadata that should not
+% compete with the assignment and student information.
 % The share of the text width the rule under the title block spans.
 \providecommand{\rzheadrule}{0.40}
 
@@ -26,21 +25,24 @@
     }
     \vspace{0.9em}
 
-    {\StudentName
-     \ifstrempty{\StudentId}{}{\rzheadsep\StudentId}\par}
+    {\StudentName\par}
+    \ifboolexpr{ test {\ifstrempty{\StudentId}}
+                 and test {\ifstrempty{\StudentEmail}} }{}{%
+      \vspace{0.15em}
+      {\small\color{rzmuted}
+       \ifstrempty{\StudentId}{}{\StudentId}%
+       \ifboolexpr{ test {\ifstrempty{\StudentId}}
+                    or test {\ifstrempty{\StudentEmail}} }{}{\rzheadsep}%
+       \ifstrempty{\StudentEmail}{}{\StudentEmail}\par}%
+    }
     \vspace{0.15em}
     {\CourseCode\ifstrempty{\CourseName}{}{\rzheadsep\CourseName}\par}
     \vspace{0.15em}
     {\SubmissionDate\par}
 
-    \ifboolexpr{ test {\ifstrempty{\InstructorName}}
-                 and test {\ifstrempty{\Collaborators}} }{}{%
+    \ifdefempty{\InstructorName}{}{%
       \vspace{0.45em}
-      {\footnotesize\color{rzmuted}
-       \ifstrempty{\InstructorName}{}{\InstructorName}%
-       \ifboolexpr{ test {\ifstrempty{\InstructorName}}
-                    or test {\ifstrempty{\Collaborators}} }{}{\rzheadsep}%
-       \ifstrempty{\Collaborators}{}{Collaborators: \Collaborators}\par}%
+      {\footnotesize\color{rzmuted}\InstructorName\par}%
     }
 
     % Long enough to read as a divider between the header and the body, short
