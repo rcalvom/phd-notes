@@ -325,8 +325,8 @@ I noticed the following points and I tried to give the best explanation I could:
 
 \begin{enumerate}
     \item \textbf{\code{.global} keyword is gone:} Investigating a little bit about this, the way to determine whether a label is global is to inspect the symbol table. Using the command \code{readelf -s babysteps.elf}, I was able to see it as global.
-    \item \textbf{Label \code{top:} is gone:} In my experience working in compilers, it should've been removed by some sort of compiler optimization. It is clear that this label was not necessary due to the existence of top in the same memory address.
-    \item \textbf{\code{eor} instruction now has 3 parameters:} This is because the original \code{eor r1, r1} is just a shortcut of the 3-parameter version because the destination register is the same as the first operand of the XOR operation.
+    \item \textbf{Label \code{top:} is gone:} In my experience working in compilers, it should've been removed by some sort of compiler optimization. It is clear that this label was not necessary due to the existence of \code{\_start} at the same memory address.
+    \item \textbf{\code{eor} instruction now has 3 parameters:} This is because the original \code{eor r1, r1} is just a shortcut of the 3-parameter version. The destination register is the same as the first operand of the XOR operation.
 \end{enumerate}
 
 Essentially, the changes are for optimization, but the semantics of the sources are equivalent.
@@ -552,7 +552,7 @@ explode:
 memory_start:
     .word 0
     .word 0
-    @ .word 1  @ Uncomment this line to test the nonzero path.
+    @ .word 1  @ I replaced this with 1 or 0 depending on the test I wanted to run.
     .word 0
     .word 0
 memory_end:
@@ -565,7 +565,7 @@ Let's go through each point:
     \item The addresses of \code{memory\_start} and \code{memory\_end} define the range that the program checks.
     \item The registers \code{r0} and \code{r1} store the current address and the end address, respectively.
     \item \code{ldr r2, [r0], \#4} reads one 32-bit word into \code{r2} and advances the current address by four bytes.
-    \item \code{cmp r2, \#0} and \code{bne explode} transfer execution to \code{explode} when the value is not zero.
+    \item \code{cmp r2, \#0} and \code{bne explode} move execution to \code{explode} when the value is not zero.
     \item \code{cmp r0, r1} and \code{bne check\_memory} repeat the loop until the program reaches the end of the selected memory range.
     \item The \code{all\_zero} and \code{explode} labels use \code{b .} to identify the result and remain at the current instruction forever.
     \item \code{.data} places the test values in the data section, while \code{.align 2} aligns them to a four-byte boundary.
@@ -647,8 +647,8 @@ It looked short (and I thought it was going to take me \(\sim\)1 hour), but read
 Also, I wanted to provide as many details as I could, but I am unsure if the level of detail I provided here is enough or if I overexplained things here.
 I probably spent more time than required because I overexplained some things.
 
-I really liked the format; it is more like a conversation between the professor/TA and the student so it is open to creativity. Also the material is very well explained.
+I really liked the format; it is more like a conversation between the professor/TA and the student, so it is open to creativity. Also, the material is very well explained.
 
-Fortunately I use Arch Linux so I didn't have to troubleshoot a lot.
+Fortunately, I use Arch Linux so I didn't have to troubleshoot a lot.
 
 \input{../template/assignment-end}
