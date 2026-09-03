@@ -1,0 +1,8 @@
+pyproject.toml
+rzstyle.py
+rzstyle.egg-info/PKG-INFO
+rzstyle.egg-info/SOURCES.txt
+rzstyle.egg-info/dependency_links.txt
+rzstyle.egg-info/entry_points.txt
+rzstyle.egg-info/requires.txt
+rzstyle.egg-info/top_level.txt

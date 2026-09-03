@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: rzstyle
+Version: 1.0.0
+Summary: Pygments styles matching ricardo's Neovim colours
+Requires-Python: >=3.9
+Requires-Dist: Pygments>=2.12

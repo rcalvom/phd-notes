@@ -1,0 +1,3 @@
+[pygments.styles]
+rzstyle = rzstyle:RicardoStyle
+rzstyle-light = rzstyle:RicardoLightStyle
