@@ -12,7 +12,7 @@ I use Arch Linux as my operating system.
 I use \code{pacman} to manage packages.
 
 I found that the package names listed in the assignment correspond directly to packages in \code{pacman}.
-I used the \code{--needed} flag to avoid reinstalling packages if they were already present in my system.
+I used the \code{--needed} flag to avoid reinstalling packages if they were already present on my system.
 
 \TermHost{ricardo}
 \TermTitle{Terminal}
@@ -153,10 +153,10 @@ To build this, I ran the commands recommended in the readings:
 \cmd{arm-none-eabi-ld -g babysteps.o -o babysteps.elf}
 \end{terminal}
 
-Investigating by myself, I was able to understand what those commands do:
+After investigating this myself, I was able to understand what those commands do:
 
 \begin{itemize}
-    \item The first command \filepath{arm-none-eabi-as} builds an object file for ARM architecture.
+    \item The first command \filepath{arm-none-eabi-as} builds an object file for the ARM architecture.
     It reads the file \filepath{babysteps.s} and then the flag \code{-o} indicates the output path \filepath{babysteps.o}.
     \item The second command \filepath{arm-none-eabi-ld} links the object file assigning memory addresses and resolving symbols.
     It reads the file \filepath{babysteps.o} and then the flag \code{-o} indicates the output path \filepath{babysteps.elf}.
@@ -269,7 +269,7 @@ Key to Flags:
   D (mbind), y (purecode), p (processor specific)
 \end{terminal}
 
-Again, I investigated about the information here and I summarize it:
+Again, I researched this information and summarized it as follows:
 
 \begin{itemize}
     \item \textbf{Index 0:} Empty by convention.
@@ -310,10 +310,10 @@ Disassembly of section .ARM.attributes:
   10:   Address 0x10 is out of bounds.
 \end{terminal}
 
-According to the output we got, I see in the \code{.text} section the code disassembled.
+According to the output we got, I see the disassembled code in the \code{.text} section.
 The output includes memory addresses, but its logic is the same as the source code we had before.
 
-Cleaning up the output of the disassembling command, I would recover the data like this:
+Cleaning up the disassembly output, I would recover the data like this:
 
 \begin{codebox}[asm]{babysteps_recovered.s}
 _start:
@@ -324,7 +324,7 @@ _start:
 I noticed the following points and I tried to give the best explanation I could:
 
 \begin{enumerate}
-    \item \textbf{\code{.global} keyword is gone:} Investigating a little bit about this, the way to discover if a label is global is checking the symbol table. Using the command \code{readelf -s babysteps.elf}, I was able to see it as global.
+    \item \textbf{\code{.global} keyword is gone:} Investigating a little bit about this, the way to determine whether a label is global is to inspect the symbol table. Using the command \code{readelf -s babysteps.elf}, I was able to see it as global.
     \item \textbf{Label \code{top:} is gone:} In my experience working in compilers, it should've been removed by some sort of compiler optimization. It is clear that this label was not necessary due to the existence of top in the same memory address.
     \item \textbf{\code{eor} instruction now has 3 parameters:} This is because the original \code{eor r1, r1} is just a shortcut of the 3-parameter version because the destination register is the same as the first operand of the XOR operation.
 \end{enumerate}
@@ -333,7 +333,19 @@ Essentially, the changes are for optimization, but the semantics of the sources 
 
 \section{Running ARM binaries we just built}
 
-To run the binaries in an emulated machine, I crafted the following command.
+To run the binaries in an emulated CPU, I crafted the following command.
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal}
+\begin{terminal}
+\cmd{qemu-arm babysteps.elf}
+\textit{(No output; stopped with Ctrl+C.)}
+\end{terminal}
+
+I did not get any output because of the endless loop with no prints.
+
+Now, let's run the binaries in an emulated machine, I crafted the following command.
 
 \TermHost{ricardo}
 \TermPath{homework1}
@@ -373,7 +385,7 @@ To run this, I had to:
     \item Build a sample assembly \filepath{babysteps.s} and then run it in a full hardware emulation of the board \code{mcimx6ul-evk}.
 \end{itemize}
 
-Now, I investigated (with a little bit of help of my agent) which board in the catalog of emulable boards is the closest to the \code{USB Armory MKII}.
+Now, I investigated (with a little help from my agent) which board in the catalog of emulable boards is the closest to the \code{USB Armory MKII}.
 
 I found the board \code{mcimx6ul-evk} as the closest for the following reasons:
 
@@ -423,7 +435,7 @@ More details about this:
     \item \code{.asciz} stores the message with a null byte at the end; \code{\textbackslash r\textbackslash n} are a carriage return and a new line.
 \end{itemize}
 
-Now, building and executing it.
+I then built and executed it.
 
 \TermHost{ricardo}
 \TermPath{homework1}
@@ -508,5 +520,135 @@ What I did so far is the following step-by-step:
     \item I set a breakpoint at the beginning of the endless loop; then the program stopped there.
     \item Finally, I continued the execution, but the program hit the breakpoint again after going up in the loop.
 \end{enumerate}
+
+\section{Modifying our basic code}
+
+Now, let's create the memory checker described in the reading.
+
+I crafted the following file.
+
+\begin{codebox}[asm]{memory_check.s}
+.global _start
+
+_start:
+    ldr r0, =memory_start
+    ldr r1, =memory_end
+
+check_memory:
+    ldr r2, [r0], #4
+    cmp r2, #0
+    bne explode
+    cmp r0, r1
+    bne check_memory
+
+all_zero:
+    b .
+
+explode:
+    b .
+
+.data
+.align 2
+memory_start:
+    .word 0
+    .word 0
+    @ .word 1  @ Uncomment this line to test the nonzero path.
+    .word 0
+    .word 0
+memory_end:
+\end{codebox}
+
+Let's go through each point:
+
+\begin{enumerate}
+    \item \code{.global \_start} makes the entry symbol globally visible.
+    \item The addresses of \code{memory\_start} and \code{memory\_end} define the range that the program checks.
+    \item The registers \code{r0} and \code{r1} store the current address and the end address, respectively.
+    \item \code{ldr r2, [r0], \#4} reads one 32-bit word into \code{r2} and advances the current address by four bytes.
+    \item \code{cmp r2, \#0} and \code{bne explode} transfer execution to \code{explode} when the value is not zero.
+    \item \code{cmp r0, r1} and \code{bne check\_memory} repeat the loop until the program reaches the end of the selected memory range.
+    \item The \code{all\_zero} and \code{explode} labels use \code{b .} to identify the result and remain at the current instruction forever.
+    \item \code{.data} places the test values in the data section, while \code{.align 2} aligns them to a four-byte boundary.
+    \item The commented \code{.word 1} line lets me switch between the two cases by commenting or uncommenting it before rebuilding the program.
+\end{enumerate}
+
+Now, it is about time to run it!
+
+Running the all-zero test with GDB:
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 1: All-zero test}
+\begin{terminal}
+\cmd{arm-none-eabi-as -g memory_check.s -o memory_check.o}
+\cmd{arm-none-eabi-ld -g memory_check.o -o memory_check.elf}
+\cmd{qemu-arm -one-insn-per-tb -g 1234 memory_check.elf}
+\textit{(Waiting for connection...)}
+\end{terminal}
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 2: All-zero test}
+\begin{terminal}
+\cmd{arm-none-eabi-gdb}
+(gdb) file memory_check.elf
+(gdb) target remote localhost:1234
+(gdb) break all_zero
+Breakpoint 1 at 0x801c: file memory_check.s, line 15.
+(gdb) break explode
+Breakpoint 2 at 0x8020: file memory_check.s, line 18.
+(gdb) continue
+Breakpoint 1, all_zero () at memory_check.s:15
+15          b .
+(gdb) info registers r2 pc
+r2             0x0                 0
+pc             0x801c              0x801c <all_zero>
+\end{terminal}
+
+Next, I tested a memory range containing a nonzero value.
+
+I uncommented \code{.word 1}, rebuilt the program, and repeated the same debugging procedure.
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 1: Nonzero test}
+\begin{terminal}
+\cmd{arm-none-eabi-as -g memory_check.s -o memory_check.o}
+\cmd{arm-none-eabi-ld -g memory_check.o -o memory_check.elf}
+\cmd{qemu-arm -one-insn-per-tb -g 1234 memory_check.elf}
+\textit{(Waiting for connection...)}
+\end{terminal}
+
+\TermHost{ricardo}
+\TermPath{homework1}
+\TermTitle{Terminal 2: Nonzero test}
+\begin{terminal}
+\cmd{arm-none-eabi-gdb}
+(gdb) file memory_check.elf
+(gdb) target remote localhost:1234
+(gdb) break all_zero
+Breakpoint 1 at 0x801c: file memory_check.s, line 15.
+(gdb) break explode
+Breakpoint 2 at 0x8020: file memory_check.s, line 18.
+(gdb) continue
+Breakpoint 2, explode () at memory_check.s:18
+18          b .
+(gdb) info registers r2 pc
+r2             0x1                 1
+pc             0x8020              0x8020 <explode>
+\end{terminal}
+
+\begin{callout}[Extra Credit]
+Please share how hard/easy this was for you. I want to adjust workloads/labs based on the difficulty of this first attempt.
+\end{callout}
+
+This assignment took me \(\sim\) 4 full hours of work.
+It looked short (and I thought it was going to take me \(\sim\)1 hour), but reading documentation, manual pages, and carefully understanding why everything works takes time.
+Also, I wanted to provide as many details as I could, but I am unsure if the level of detail I provided here is enough or if I overexplained things here.
+I probably spent more time than required because I overexplained some things.
+
+I really liked the format; it is more like a conversation between the professor/TA and the student so it is open to creativity. Also the material is very well explained.
+
+Fortunately I use Arch Linux so I didn't have to troubleshoot a lot.
 
 \input{../template/assignment-end}
